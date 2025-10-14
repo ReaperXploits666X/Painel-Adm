@@ -1,80 +1,92 @@
 local p = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
-gui.Name = "AdminPanel"
+gui.Name = "PainelADM"
 
+-- Painel principal
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 260, 0, 360)
-frame.Position = UDim2.new(1, -270, 0.5, -180)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BorderSizePixel = 2
+frame.Size = UDim2.new(0, 260, 0, 400)
+frame.Position = UDim2.new(0.5, -130, 0.5, -200)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "Admin Panel"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Font = Enum.Font.Fantasy
-title.TextSize = 20
-title.BackgroundTransparency = 1
+-- Contorno RGB (versão amarela com efeito)
+local border = Instance.new("UIStroke", frame)
+border.Thickness = 2
+border.Color = Color3.fromRGB(255, 170, 0)
+border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-local toggle = Instance.new("TextButton", frame)
-toggle.Size = UDim2.new(0.9, 0, 0, 28)
-toggle.Position = UDim2.new(0.05, 0, 0, 40)
-toggle.Text = "Open Player List"
-toggle.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-toggle.TextColor3 = Color3.new(0, 0, 0)
-toggle.Font = Enum.Font.Fantasy
-toggle.TextSize = 16
+-- Título
+local titulo = Instance.new("TextLabel", frame)
+titulo.Size = UDim2.new(1, 0, 0, 35)
+titulo.Text = "Painel ADM"
+titulo.TextColor3 = Color3.new(1, 1, 1)
+titulo.Font = Enum.Font.Fantasy
+titulo.TextSize = 16
+titulo.BackgroundTransparency = 1
 
-local list = Instance.new("ScrollingFrame", frame)
-list.Size = UDim2.new(0.9, 0, 0, 100)
-list.Position = UDim2.new(0.05, 0, 0, 75)
-list.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-list.BorderSizePixel = 0
-list.ScrollBarThickness = 6
-list.CanvasSize = UDim2.new(0, 0, 0, 0)
-list.Visible = false
+-- Botão abrir/fechar lista
+local toggleLista = Instance.new("TextButton", frame)
+toggleLista.Size = UDim2.new(0.9, 0, 0, 25)
+toggleLista.Position = UDim2.new(0.05, 0, 0, 40)
+toggleLista.Text = "Abrir Lista de Jogadores"
+toggleLista.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+toggleLista.TextColor3 = Color3.new(1, 1, 1)
+toggleLista.Font = Enum.Font.Fantasy
+toggleLista.TextSize = 14
 
-local selectedPlayer = nil
+-- Lista de jogadores
+local lista = Instance.new("ScrollingFrame", frame)
+lista.Size = UDim2.new(0.9, 0, 0, 100)
+lista.Position = UDim2.new(0.05, 0, 0, 70)
+lista.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+lista.BorderSizePixel = 0
+lista.CanvasSize = UDim2.new(0, 0, 0, 0)
+lista.ScrollBarThickness = 6
+lista.Visible = false
 
-local function updateList()
-	list:ClearAllChildren()
+local jogadorSelecionado = nil
+
+-- Atualiza lista
+local function atualizarLista()
+	lista:ClearAllChildren()
 	local y = 0
-	for _, player in pairs(game.Players:GetPlayers()) do
-		local b = Instance.new("TextButton", list)
-		b.Size = UDim2.new(1, 0, 0, 25)
+	for _, jogador in pairs(game.Players:GetPlayers()) do
+		local b = Instance.new("TextButton", lista)
+		b.Size = UDim2.new(1, 0, 0, 22)
 		b.Position = UDim2.new(0, 0, 0, y)
-		b.Text = player.Name
-		b.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+		b.Text = jogador.Name
+		b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		b.TextColor3 = Color3.new(1, 1, 1)
 		b.Font = Enum.Font.Fantasy
-		b.TextSize = 14
+		b.TextSize = 13
 		b.MouseButton1Click:Connect(function()
-			selectedPlayer = player
-			title.Text = "Admin - " .. player.Name
-			for _, btn in pairs(list:GetChildren()) do
+			jogadorSelecionado = jogador
+			titulo.Text = "ADM - " .. jogador.Name
+			for _, btn in pairs(lista:GetChildren()) do
 				if btn:IsA("TextButton") then
-					btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+					btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 				end
 			end
 			b.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 		end)
-		y += 28
+		y += 24
 	end
-	list.CanvasSize = UDim2.new(0, 0, 0, y)
+	lista.CanvasSize = UDim2.new(0, 0, 0, y)
 end
 
-toggle.MouseButton1Click:Connect(function()
-	list.Visible = not list.Visible
-	toggle.Text = list.Visible and "Close Player List" or "Open Player List"
-	updateList()
+toggleLista.MouseButton1Click:Connect(function()
+	lista.Visible = not lista.Visible
+	toggleLista.Text = lista.Visible and "Fechar Lista" or "Abrir Lista de Jogadores"
+	atualizarLista()
 end)
 
-game.Players.PlayerAdded:Connect(function() if list.Visible then updateList() end end)
-game.Players.PlayerRemoving:Connect(function() if list.Visible then updateList() end end)
+game.Players.PlayerAdded:Connect(function() if lista.Visible then atualizarLista() end end)
+game.Players.PlayerRemoving:Connect(function() if lista.Visible then atualizarLista() end end)
 
-local commands = {
+-- Comandos ADM
+local comandos = {
 	{"Kick", function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then hrp.CFrame = CFrame.new(9999, 9999, 9999) end
@@ -122,18 +134,19 @@ local commands = {
 	end},
 }
 
-for i, cmd in ipairs(commands) do
+-- Botões em linha vertical
+for i, cmd in ipairs(comandos) do
 	local b = Instance.new("TextButton", frame)
-	b.Size = UDim2.new(0.42, 0, 0, 26)
-	b.Position = UDim2.new(0.05 + ((i-1)%2)*0.48, 0, 0, 190 + math.floor((i-1)/2)*30)
+	b.Size = UDim2.new(0.9, 0, 0, 25)
+	b.Position = UDim2.new(0.05, 0, 0, 180 + (i-1)*28)
 	b.Text = cmd[1]
 	b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-	b.TextColor3 = Color3.new(0, 0, 0)
+	b.TextColor3 = Color3.new(1, 1, 1)
 	b.Font = Enum.Font.Fantasy
-	b.TextSize = 14
+	b.TextSize = 13
 	b.MouseButton1Click:Connect(function()
-		if selectedPlayer then
-			cmd[2](selectedPlayer)
+		if jogadorSelecionado then
+			cmd[2](jogadorSelecionado)
 		end
 	end)
 end
