@@ -3,24 +3,24 @@ local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
 gui.Name = "AdminPanel"
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 280, 0, 380)
-frame.Position = UDim2.new(0.5, -140, 0.5, -190)
-frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+frame.Size = UDim2.new(0, 260, 0, 360)
+frame.Position = UDim2.new(1, -270, 0.5, -180)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 2
 frame.Active = true
 frame.Draggable = true
 
 local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "Supreme Administrator"
-title.TextColor3 = Color3.fromRGB(255, 0, 0)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "Admin Panel"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.Font = Enum.Font.Fantasy
-title.TextSize = 22
+title.TextSize = 20
 title.BackgroundTransparency = 1
 
 local toggle = Instance.new("TextButton", frame)
 toggle.Size = UDim2.new(0.9, 0, 0, 28)
-toggle.Position = UDim2.new(0.05, 0, 0, 45)
+toggle.Position = UDim2.new(0.05, 0, 0, 40)
 toggle.Text = "Open Player List"
 toggle.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
 toggle.TextColor3 = Color3.new(0, 0, 0)
@@ -29,7 +29,7 @@ toggle.TextSize = 16
 
 local list = Instance.new("ScrollingFrame", frame)
 list.Size = UDim2.new(0.9, 0, 0, 100)
-list.Position = UDim2.new(0.05, 0, 0, 80)
+list.Position = UDim2.new(0.05, 0, 0, 75)
 list.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 list.BorderSizePixel = 0
 list.ScrollBarThickness = 6
@@ -120,18 +120,6 @@ local commands = {
 		local targethrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp and targethrp then hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0) end
 	end},
-	{"Unban Houses", function()
-		local banned = game.ReplicatedStorage:FindFirstChild("BannedLots")
-		if banned then banned:Destroy() end
-	end},
-	{"House Access", function()
-		for _, v in pairs(workspace:GetDescendants()) do
-			if v:IsA("BasePart") and v.Name == "Door" then
-				v.CanCollide = false
-				v.Transparency = 0.5
-			end
-		end
-	end},
 }
 
 for i, cmd in ipairs(commands) do
@@ -144,7 +132,7 @@ for i, cmd in ipairs(commands) do
 	b.Font = Enum.Font.Fantasy
 	b.TextSize = 14
 	b.MouseButton1Click:Connect(function()
-		if selectedPlayer or cmd[1] == "Unjail" or cmd[1] == "Unban Houses" or cmd[1] == "House Access" then
+		if selectedPlayer then
 			cmd[2](selectedPlayer)
 		end
 	end)
