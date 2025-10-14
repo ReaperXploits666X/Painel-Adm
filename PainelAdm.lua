@@ -1,1 +1,1 @@
-loadstring(game:HttpGet(https://github.com/canaldegtamodsmods-spec/Painel-Adm/blob/main/PainelAdmBrook", true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/canaldegtamodsmods-spec/Painel-Adm/main/PainelAdmBrook.lua", true))()
