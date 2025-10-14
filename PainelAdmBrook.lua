@@ -2,7 +2,6 @@ local p = game.Players.LocalPlayer
 local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
 gui.Name = "PainelADM"
 
--- Painel principal
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 260, 0, 400)
 frame.Position = UDim2.new(0.5, -130, 0.5, -200)
@@ -11,13 +10,12 @@ frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 
--- Contorno RGB (versão amarela com efeito)
+-- Borda RGB amarela dinâmica
 local border = Instance.new("UIStroke", frame)
 border.Thickness = 2
-border.Color = Color3.fromRGB(255, 170, 0)
 border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- Título
+-- Título com RGB azul
 local titulo = Instance.new("TextLabel", frame)
 titulo.Size = UDim2.new(1, 0, 0, 35)
 titulo.Text = "Painel ADM"
@@ -26,7 +24,16 @@ titulo.Font = Enum.Font.Fantasy
 titulo.TextSize = 16
 titulo.BackgroundTransparency = 1
 
--- Botão abrir/fechar lista
+-- Efeitos RGB dinâmicos
+local hue = 0
+game:GetService("RunService").RenderStepped:Connect(function()
+	hue = (hue + 0.005) % 1
+	local rgb = Color3.fromHSV(hue, 1, 1)
+	titulo.TextColor3 = Color3.fromHSV((hue + 0.6) % 1, 1, 1) -- tom azul
+	border.Color = rgb -- borda amarela RGB
+end)
+
+-- Botão abrir lista
 local toggleLista = Instance.new("TextButton", frame)
 toggleLista.Size = UDim2.new(0.9, 0, 0, 25)
 toggleLista.Position = UDim2.new(0.05, 0, 0, 40)
@@ -34,7 +41,7 @@ toggleLista.Text = "Abrir Lista de Jogadores"
 toggleLista.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
 toggleLista.TextColor3 = Color3.new(1, 1, 1)
 toggleLista.Font = Enum.Font.Fantasy
-toggleLista.TextSize = 14
+toggleLista.TextSize = 13
 
 -- Lista de jogadores
 local lista = Instance.new("ScrollingFrame", frame)
@@ -48,7 +55,6 @@ lista.Visible = false
 
 local jogadorSelecionado = nil
 
--- Atualiza lista
 local function atualizarLista()
 	lista:ClearAllChildren()
 	local y = 0
