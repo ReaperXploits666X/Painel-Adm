@@ -4,7 +4,6 @@ local lp = Players.LocalPlayer
 local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 gui.Name = "PainelADM"
 
--- Painel principal
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 260, 0, 360)
 main.Position = UDim2.new(0.5, -130, 0.5, -180)
@@ -30,7 +29,6 @@ closeMain.MouseButton1Click:Connect(function()
 	main.Visible = false
 end)
 
--- Painel da lista
 local listaFrame = Instance.new("Frame", gui)
 listaFrame.Size = UDim2.new(0, 260, 0, 300)
 listaFrame.Position = UDim2.new(0.5, -130, 0.5, -150)
@@ -83,7 +81,6 @@ end
 Players.PlayerAdded:Connect(function() if listaFrame.Visible then updateList() end end)
 Players.PlayerRemoving:Connect(function() if listaFrame.Visible then updateList() end end)
 
--- Botão abrir lista
 local openList = Instance.new("TextButton", main)
 openList.Size = UDim2.new(0.9, 0, 0, 25)
 openList.Position = UDim2.new(0.05, 0, 0, 40)
@@ -95,7 +92,6 @@ openList.MouseButton1Click:Connect(function()
 	updateList()
 end)
 
--- Comandos ADM
 local comandos = {
 	{"KICK", function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
