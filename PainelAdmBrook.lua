@@ -11,21 +11,6 @@ frame.BorderSizePixel = 4
 frame.Active = true
 frame.Draggable = true
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
-frame.BackgroundTransparency = 0.1
-
--- Borda RGB amarela animada
-task.spawn(function()
-	while true do
-		for i = 0, 1, 0.02 do
-			frame.BorderColor3 = Color3.fromRGB(255, math.floor(i*255), 0)
-			wait(0.05)
-		end
-		for i = 1, 0, -0.02 do
-			frame.BorderColor3 = Color3.fromRGB(255, math.floor(i*255), 0)
-			wait(0.05)
-		end
-	end
-end)
 
 -- Título
 local titulo = Instance.new("TextLabel", frame)
@@ -69,7 +54,7 @@ end
 
 atualizarLista()
 
--- Comandos simulados
+-- Comandos
 local comandos = {
 	{nome = "Kick", acao = function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
@@ -176,4 +161,12 @@ for i, cmd in ipairs(comandos) do
 	botao.Position = UDim2.new(0.05 + ((i-1)%2)*0.48, 0, 0, 200 + math.floor((i-1)/2)*40)
 	botao.Text = cmd.nome
 	botao.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-	b
+	botao.TextColor3 = Color3.new(0, 0, 0)
+	botao.Font = Enum.Font.Fantasy
+	botao.TextSize = 18
+	botao.MouseButton1Click:Connect(function()
+		if jogadorSelecionado then
+			cmd.acao(jogadorSelecionado)
+		end
+	end)
+end
