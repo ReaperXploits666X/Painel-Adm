@@ -55,7 +55,7 @@ RunService.RenderStepped:Connect(function()
 	title.TextColor3 = blue
 end)
 
--- Painel da lista (mesmo tamanho e posição)
+-- Painel da lista
 local listaFrame = Instance.new("Frame", gui)
 listaFrame.Size = main.Size
 listaFrame.Position = main.Position
@@ -73,13 +73,9 @@ listaTitle.Font = Enum.Font.Fantasy
 listaTitle.TextSize = 16
 listaTitle.BackgroundTransparency = 1
 
-local listaHue = 0
 RunService.RenderStepped:Connect(function()
-	listaHue = (listaHue + 0.005) % 1
-	local yellow = Color3.fromHSV((listaHue + 0.1) % 1, 1, 1)
-	local blue = Color3.fromHSV((listaHue + 0.6) % 1, 1, 1)
-	listaBorder.Color = yellow
-	listaTitle.TextColor3 = blue
+	listaBorder.Color = border.Color
+	listaTitle.TextColor3 = title.TextColor3
 end)
 
 local closeLista = Instance.new("TextButton", listaFrame)
@@ -133,7 +129,6 @@ end
 Players.PlayerAdded:Connect(function() if listaFrame.Visible then updateList() end end)
 Players.PlayerRemoving:Connect(function() if listaFrame.Visible then updateList() end end)
 
--- Botão abrir lista
 local openList = Instance.new("TextButton", main)
 openList.Size = UDim2.new(0.9, 0, 0, 25)
 openList.Position = UDim2.new(0.05, 0, 0, 40)
@@ -147,3 +142,77 @@ openList.MouseButton1Click:Connect(function()
 	listaFrame.Visible = true
 	updateList()
 end)
+
+-- Botões ADM com borda amarela
+local comandos = {
+	{"KICK", function(t)
+		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then hrp.CFrame = CFrame.new(9999, 9999, 9999) end
+	end},
+	{"JAIL", function(t)
+		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			local cage = Instance.new("Part", workspace)
+			cage.Size = Vector3.new(6, 6, 6)
+			cage.Anchored = true
+			cage.Position = hrp.Position
+			cage.Transparency = 0.5
+			cage.Color = Color3.fromRGB(0, 170, 255)
+			cage.Name = "JailCube"
+		end
+	end},
+	{"UNJAIL", function()
+		for _, v in pairs(workspace:GetChildren()) do
+			if v.Name == "JailCube" then v:Destroy() end
+		end
+	end},
+	{"FREEZE", function(t)
+		for _, part in pairs(t.Character:GetDescendants()) do
+			if part:IsA("BasePart") then part.Anchored = true end
+		end
+	end},
+	{"UNFREEZE", function(t)
+		for _, part in pairs(t.Character:GetDescendants()) do
+			if part:IsA("BasePart") then part.Anchored = false end
+		end
+	end},
+	{"KILL", function(t)
+		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
+		if h then h:TakeDamage(9999) end
+	end},
+	{"TP", function(t)
+		local hrp = lp.Character and lp.Character
+
+			if hrp and targethrp then
+			hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0)
+		end
+	end},
+}
+
+for i, cmd in ipairs(comandos) do
+	local quadro = Instance.new("Frame", main)
+	quadro.Size = UDim2.new(0.9, 0, 0, 25)
+	quadro.Position = UDim2.new(0.05, 0, 0, 80 + (i-1)*30)
+	quadro.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+
+	local borda = Instance.new("UIStroke", quadro)
+	borda.Thickness = 2
+	borda.Color = Color3.fromRGB(255, 170, 0)
+
+	local botao = Instance.new("TextButton", quadro)
+	botao.Size = UDim2.new(1, 0, 1, 0)
+	botao.Text = cmd[1]
+	botao.BackgroundTransparency = 1
+	botao.TextColor3 = Color3.new(1, 1, 1)
+	botao.Font = Enum.Font.Fantasy
+	botao.TextSize = 13
+
+	botao.MouseButton1Click:Connect(function()
+		if selectedPlayer then
+			cmd[2](selectedPlayer)
+			borda.Color = Color3.fromRGB(0, 255, 127)
+			wait(0.2)
+			borda.Color = Color3.fromRGB(255, 170, 0)
+		end
+	end)
+end
