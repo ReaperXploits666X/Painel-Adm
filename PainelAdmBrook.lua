@@ -1,76 +1,116 @@
-local p = game.Players.LocalPlayer
-local gui = Instance.new("ScreenGui", p:WaitForChild("PlayerGui"))
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lp = Players.LocalPlayer
+
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 gui.Name = "PainelADM"
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 260, 0, 400)
-frame.Position = UDim2.new(0.5, -130, 0.5, -200)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+-- Painel principal
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 260, 0, 360)
+main.Position = UDim2.new(0.5, -130, 0.5, -180)
+main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+main.BorderSizePixel = 0
+main.Active = true
+main.Draggable = true
 
--- Borda RGB amarela dinâmica
-local border = Instance.new("UIStroke", frame)
+local border = Instance.new("UIStroke", main)
 border.Thickness = 2
 border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 -- Título com RGB azul
-local titulo = Instance.new("TextLabel", frame)
-titulo.Size = UDim2.new(1, 0, 0, 35)
-titulo.Text = "Painel ADM"
-titulo.TextColor3 = Color3.new(1, 1, 1)
-titulo.Font = Enum.Font.Fantasy
-titulo.TextSize = 16
-titulo.BackgroundTransparency = 1
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Text = "Painel ADM"
+title.Font = Enum.Font.Fantasy
+title.TextSize = 16
+title.BackgroundTransparency = 1
 
--- Efeitos RGB dinâmicos
-local hue = 0
-game:GetService("RunService").RenderStepped:Connect(function()
-	hue = (hue + 0.005) % 1
-	local rgb = Color3.fromHSV(hue, 1, 1)
-	titulo.TextColor3 = Color3.fromHSV((hue + 0.6) % 1, 1, 1) -- tom azul
-	border.Color = rgb -- borda amarela RGB
+-- Botão de fechar painel
+local closeMain = Instance.new("TextButton", main)
+closeMain.Size = UDim2.new(0, 25, 0, 25)
+closeMain.Position = UDim2.new(1, -30, 0, 5)
+closeMain.Text = "X"
+closeMain.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+closeMain.TextColor3 = Color3.new(1, 1, 1)
+closeMain.Font = Enum.Font.Fantasy
+closeMain.TextSize = 14
+closeMain.MouseButton1Click:Connect(function()
+	main.Visible = false
 end)
 
--- Botão abrir lista
-local toggleLista = Instance.new("TextButton", frame)
-toggleLista.Size = UDim2.new(0.9, 0, 0, 25)
-toggleLista.Position = UDim2.new(0.05, 0, 0, 40)
-toggleLista.Text = "Abrir Lista de Jogadores"
-toggleLista.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-toggleLista.TextColor3 = Color3.new(1, 1, 1)
-toggleLista.Font = Enum.Font.Fantasy
-toggleLista.TextSize = 13
+-- Versão
+local version = Instance.new("TextLabel", main)
+version.Size = UDim2.new(0, 100, 0, 20)
+version.Position = UDim2.new(1, -105, 1, -25)
+version.Text = "V1.00"
+version.TextColor3 = Color3.new(1, 1, 1)
+version.Font = Enum.Font.Fantasy
+version.TextSize = 12
+version.BackgroundTransparency = 1
 
--- Lista de jogadores
-local lista = Instance.new("ScrollingFrame", frame)
-lista.Size = UDim2.new(0.9, 0, 0, 100)
-lista.Position = UDim2.new(0.05, 0, 0, 70)
-lista.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-lista.BorderSizePixel = 0
-lista.CanvasSize = UDim2.new(0, 0, 0, 0)
-lista.ScrollBarThickness = 6
-lista.Visible = false
+-- RGB dinâmico
+local hue = 0
+RunService.RenderStepped:Connect(function()
+	hue = (hue + 0.005) % 1
+	local yellow = Color3.fromHSV((hue + 0.1) % 1, 1, 1)
+	local blue = Color3.fromHSV((hue + 0.6) % 1, 1, 1)
+	border.Color = yellow
+	title.TextColor3 = blue
+end)
 
-local jogadorSelecionado = nil
+-- Painel da lista
+local listaFrame = Instance.new("Frame", gui)
+listaFrame.Size = UDim2.new(0, 260, 0, 300)
+listaFrame.Position = UDim2.new(0.5, -130, 0.5, -150)
+listaFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+listaFrame.Visible = false
 
-local function atualizarLista()
-	lista:ClearAllChildren()
+local listaBorder = Instance.new("UIStroke", listaFrame)
+listaBorder.Thickness = 2
+listaBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+local listaTitle = Instance.new("TextLabel", listaFrame)
+listaTitle.Size = UDim2.new(1, 0, 0, 35)
+listaTitle.Text = "Painel ADM"
+listaTitle.Font = Enum.Font.Fantasy
+listaTitle.TextSize = 16
+listaTitle.BackgroundTransparency = 1
+
+local closeBtn = Instance.new("TextButton", listaFrame)
+closeBtn.Size = UDim2.new(0.9, 0, 0, 25)
+closeBtn.Position = UDim2.new(0.05, 0, 0, 40)
+closeBtn.Text = "FECHAR LISTA"
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+closeBtn.TextColor3 = Color3.new(1, 1, 1)
+closeBtn.Font = Enum.Font.Fantasy
+closeBtn.TextSize = 13
+
+local scroll = Instance.new("ScrollingFrame", listaFrame)
+scroll.Size = UDim2.new(0.9, 0, 0, 200)
+scroll.Position = UDim2.new(0.05, 0, 0, 70)
+scroll.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+scroll.BorderSizePixel = 0
+scroll.ScrollBarThickness = 6
+scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local selectedPlayer = nil
+
+local function updateList()
+	scroll:ClearAllChildren()
 	local y = 0
-	for _, jogador in pairs(game.Players:GetPlayers()) do
-		local b = Instance.new("TextButton", lista)
+	for _, plr in pairs(Players:GetPlayers()) do
+		local b = Instance.new("TextButton", scroll)
 		b.Size = UDim2.new(1, 0, 0, 22)
 		b.Position = UDim2.new(0, 0, 0, y)
-		b.Text = jogador.Name
+		b.Text = plr.Name
 		b.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		b.TextColor3 = Color3.new(1, 1, 1)
 		b.Font = Enum.Font.Fantasy
 		b.TextSize = 13
 		b.MouseButton1Click:Connect(function()
-			jogadorSelecionado = jogador
-			titulo.Text = "ADM - " .. jogador.Name
-			for _, btn in pairs(lista:GetChildren()) do
+			selectedPlayer = plr
+			for _, btn in pairs(scroll:GetChildren()) do
 				if btn:IsA("TextButton") then
 					btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 				end
@@ -79,29 +119,38 @@ local function atualizarLista()
 		end)
 		y += 24
 	end
-	lista.CanvasSize = UDim2.new(0, 0, 0, y)
+	scroll.CanvasSize = UDim2.new(0, 0, 0, y)
 end
 
-toggleLista.MouseButton1Click:Connect(function()
-	lista.Visible = not lista.Visible
-	toggleLista.Text = lista.Visible and "Fechar Lista" or "Abrir Lista de Jogadores"
-	atualizarLista()
+closeBtn.MouseButton1Click:Connect(function()
+	listaFrame.Visible = false
 end)
 
-game.Players.PlayerAdded:Connect(function() if lista.Visible then atualizarLista() end end)
-game.Players.PlayerRemoving:Connect(function() if lista.Visible then atualizarLista() end end)
+Players.PlayerAdded:Connect(function() if listaFrame.Visible then updateList() end end)
+Players.PlayerRemoving:Connect(function() if listaFrame.Visible then updateList() end end)
 
--- Comandos ADM
+-- Botão abrir lista
+local openList = Instance.new("TextButton", main)
+openList.Size = UDim2.new(0.9, 0, 0, 25)
+openList.Position = UDim2.new(0.05, 0, 0, 40)
+openList.Text = "LISTA DE JOGADORES"
+openList.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+openList.TextColor3 = Color3.new(1, 1, 1)
+openList.Font = Enum.Font.Fantasy
+openList.TextSize = 13
+
+openList.MouseButton1Click:Connect(function()
+	listaFrame.Visible = true
+	updateList()
+end)
+
+-- Comandos
 local comandos = {
-	{"Kick", function(t)
+	{"KICK", function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then hrp.CFrame = CFrame.new(9999, 9999, 9999) end
 	end},
-	{"Kill", function(t)
-		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
-		if h then h:TakeDamage(9999) end
-	end},
-	{"Jail", function(t)
+	{"JAIL", function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
 			local cage = Instance.new("Part", workspace)
@@ -113,46 +162,33 @@ local comandos = {
 			cage.Name = "JailCube"
 		end
 	end},
-	{"Unjail", function()
+	{"UNJAIL", function()
 		for _, v in pairs(workspace:GetChildren()) do
 			if v.Name == "JailCube" then v:Destroy() end
 		end
 	end},
-	{"Freeze", function(t)
+	{"FREEZE", function(t)
 		for _, part in pairs(t.Character:GetDescendants()) do
 			if part:IsA("BasePart") then part.Anchored = true end
 		end
 	end},
-	{"Unfreeze", function(t)
+	{"UNFREEZE", function(t)
 		for _, part in pairs(t.Character:GetDescendants()) do
 			if part:IsA("BasePart") then part.Anchored = false end
 		end
 	end},
-	{"Bring", function(t)
-		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
-		local myhrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
-		if hrp and myhrp then hrp.CFrame = myhrp.CFrame + Vector3.new(2, 0, 0) end
+	{"KILL", function(t)
+		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
+		if h then h:TakeDamage(9999) end
 	end},
-	{"Teleport", function(t)
-		local hrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+	{"TP", function(t)
+		local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
 		local targethrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp and targethrp then hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0) end
 	end},
 }
 
--- Botões em linha vertical
 for i, cmd in ipairs(comandos) do
-	local b = Instance.new("TextButton", frame)
+	local b = Instance.new("TextButton", main)
 	b.Size = UDim2.new(0.9, 0, 0, 25)
-	b.Position = UDim2.new(0.05, 0, 0, 180 + (i-1)*28)
-	b.Text = cmd[1]
-	b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.Font = Enum.Font.Fantasy
-	b.TextSize = 13
-	b.MouseButton1Click:Connect(function()
-		if jogadorSelecionado then
-			cmd[2](jogadorSelecionado)
-		end
-	end)
-end
+	b.Position = UDim2.new(0
