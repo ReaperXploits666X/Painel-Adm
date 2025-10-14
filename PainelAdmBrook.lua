@@ -30,7 +30,7 @@ end)
 -- Título
 local titulo = Instance.new("TextLabel", frame)
 titulo.Size = UDim2.new(1, 0, 0, 50)
-titulo.Text = " Painel ADM"
+titulo.Text = "Painel ADM"
 titulo.TextColor3 = Color3.fromRGB(255, 215, 0)
 titulo.Font = Enum.Font.Fantasy
 titulo.TextSize = 26
@@ -60,7 +60,7 @@ local function atualizarLista()
 		botao.TextSize = 16
 		botao.MouseButton1Click:Connect(function()
 			jogadorSelecionado = jogador
-			titulo.Text = " Painel ADM - " .. jogador.Name
+			titulo.Text = "Painel ADM - " .. jogador.Name
 		end)
 		y += 35
 	end
@@ -175,4 +175,5 @@ for i, cmd in ipairs(comandos) do
 	botao.Size = UDim2.new(0.42, 0, 0, 35)
 	botao.Position = UDim2.new(0.05 + ((i-1)%2)*0.48, 0, 0, 200 + math.floor((i-1)/2)*40)
 	botao.Text = cmd.nome
-	botao.BackgroundColor3 = Color3.fromRGB(255,
+	botao.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+	b
