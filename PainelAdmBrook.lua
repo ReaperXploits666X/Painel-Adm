@@ -7,10 +7,24 @@ local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 320, 0, 480)
 frame.Position = UDim2.new(0.5, -160, 0.5, -240)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-frame.BorderSizePixel = 0
+frame.BorderSizePixel = 4
 frame.Active = true
 frame.Draggable = true
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
+
+-- Borda RGB amarela animada
+task.spawn(function()
+	while true do
+		for i = 0, 1, 0.02 do
+			frame.BorderColor3 = Color3.fromRGB(255, math.floor(i*255), 0)
+			wait(0.05)
+		end
+		for i = 1, 0, -0.02 do
+			frame.BorderColor3 = Color3.fromRGB(255, math.floor(i*255), 0)
+			wait(0.05)
+		end
+	end
+end)
 
 -- Título
 local titulo = Instance.new("TextLabel", frame)
@@ -21,7 +35,7 @@ titulo.Font = Enum.Font.Fantasy
 titulo.TextSize = 26
 titulo.BackgroundTransparency = 1
 
--- Área de seleção de jogador
+-- Lista de jogadores
 local jogadorSelecionado = nil
 local listaJogadores = Instance.new("ScrollingFrame", frame)
 listaJogadores.Size = UDim2.new(0.9, 0, 0, 120)
@@ -54,41 +68,77 @@ end
 
 atualizarLista()
 
--- Comandos
+-- Comandos simulados
 local comandos = {
-	{nome = "Kick", acao = function(t) t:Kick("Você foi expulso pelo ADM.") end},
-	{nome = "Kill", acao = function(t) local h = t.Character:FindFirstChildOfClass("Humanoid") if h then h.Health = 0 end end},
+	{nome = "Kick", acao = function(t)
+		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then hrp.CFrame = CFrame.new(Vector3.new(9999, 9999, 9999)) end
+		local gui = Instance.new("ScreenGui", t:WaitForChild("PlayerGui"))
+		local tela = Instance.new("Frame", gui)
+		tela.Size = UDim2.new(1, 0, 1, 0)
+		tela.BackgroundColor3 = Color3.new(0, 0, 0)
+		local msg = Instance.new("TextLabel", tela)
+		msg.Size = UDim2.new(1, 0, 0, 100)
+		msg.Position = UDim2.new(0, 0, 0.5, -50)
+		msg.Text = "Você foi expulso pelo ADM"
+		msg.TextColor3 = Color3.new(1, 0, 0)
+		msg.Font = Enum.Font.Fantasy
+		msg.TextSize = 32
+		msg.BackgroundTransparency = 1
+	end},
+
+	{nome = "Kill", acao = function(t)
+		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then
+			hrp.Velocity = Vector3.new(0, 1000, 0)
+			task.wait(0.2)
+			hrp.CFrame = hrp.CFrame + Vector3.new(0, 5000, 0)
+		end
+	end},
+
 	{nome = "Jail", acao = function(t)
+		local char = t.Character
+		if not char then return end
 		local cage = Instance.new("Part")
 		cage.Size = Vector3.new(6, 6, 6)
 		cage.Anchored = true
 		cage.Transparency = 0.5
 		cage.Color = Color3.fromRGB(0, 170, 255)
-		cage.Position = t.Character:FindFirstChild("HumanoidRootPart").Position
+		cage.Position = char:FindFirstChild("HumanoidRootPart").Position
 		cage.Name = "JailCube"
 		cage.Parent = workspace
+		for _, parte in pairs(char:GetDescendants()) do
+			if parte:IsA("BasePart") then parte.Color = Color3.fromRGB(30, 30, 30) end
+		end
+		local h = char:FindFirstChildOfClass("Humanoid")
+		if h then h.WalkSpeed = 0 h.JumpPower = 0 end
 	end},
+
 	{nome = "Unjail", acao = function(t)
 		for _, obj in pairs(workspace:GetChildren()) do
 			if obj.Name == "JailCube" then obj:Destroy() end
 		end
 	end},
+
 	{nome = "Freeze", acao = function(t)
-		local h = t.Character:FindFirstChildOfClass("Humanoid")
+		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
 		if h then h.WalkSpeed = 0 h.JumpPower = 0 end
 	end},
+
 	{nome = "Unfreeze", acao = function(t)
-		local h = t.Character:FindFirstChildOfClass("Humanoid")
+		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
 		if h then h.WalkSpeed = 16 h.JumpPower = 50 end
 	end},
+
 	{nome = "Bring", acao = function(t)
-		local hrp = t.Character:FindFirstChild("HumanoidRootPart")
-		local myhrp = p.Character:FindFirstChild("HumanoidRootPart")
+		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
+		local myhrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
 		if hrp and myhrp then hrp.CFrame = myhrp.CFrame + Vector3.new(2, 0, 0) end
 	end},
+
 	{nome = "TP", acao = function(t)
-		local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-		local targethrp = t.Character:FindFirstChild("HumanoidRootPart")
+		local hrp = p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+		local targethrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp and targethrp then hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0) end
 	end},
 }
