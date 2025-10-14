@@ -192,3 +192,19 @@ for i, cmd in ipairs(comandos) do
 	local b = Instance.new("TextButton", main)
 	b.Size = UDim2.new(0.9, 0, 0, 25)
 	b.Position = UDim2.new(0
+
+		for i, cmd in ipairs(comandos) do
+	local b = Instance.new("TextButton", main)
+	b.Size = UDim2.new(0.9, 0, 0, 25)
+	b.Position = UDim2.new(0.05, 0, 0, 80 + (i-1)*28)
+	b.Text = cmd[1]
+	b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
+	b.TextColor3 = Color3.new(1, 1, 1)
+	b.Font = Enum.Font.Fantasy
+	b.TextSize = 13
+	b.MouseButton1Click:Connect(function()
+		if selectedPlayer then
+			cmd[2](selectedPlayer)
+		end
+	end)
+		end
