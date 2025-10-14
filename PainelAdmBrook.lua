@@ -109,23 +109,3 @@ for i, cmd in ipairs(comandos) do
 		end
 	end)
 end
-
--- Animação de borda RGB amarela
-task.spawn(function()
-	while true do
-		for i = 0, 1, 0.02 do
-			local r = 1
-			local g = i
-			local b = 0
-			frame.BorderColor3 = Color3.new(r, g, b)
-			wait(0.05)
-		end
-		for i = 1, 0, -0.02 do
-			local r = 1
-			local g = i
-			local b = 0
-			frame.BorderColor3 = Color3.new(r, g, b)
-			wait(0.05)
-		end
-	end
-end)
