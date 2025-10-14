@@ -174,30 +174,4 @@ local comandos = {
 		if h then h:TakeDamage(9999) end
 	end},
 	{"TP", function(t)
-		local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-		local targethrp = t.Character and t.Character:Find
-
-			for i, cmd in ipairs(comandos) do
-	local b = Instance.new("TextButton", main)
-	b.Size = UDim2.new(0.9, 0, 0, 25)
-	b.Position = UDim2.new(0.05, 0, 0, 80 + (i-1)*28)
-	b.Text = cmd[1]
-	b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-	b.TextColor3 = Color3.new(1, 1, 1)
-	b.Font = Enum.Font.Fantasy
-	b.TextSize = 13
-
-	-- Efeito visual de clique
-	local stroke = Instance.new("UIStroke", b)
-	stroke.Thickness = 1
-	stroke.Color = Color3.fromRGB(255, 255, 255)
-
-	b.MouseButton1Click:Connect(function()
-		if selectedPlayer then
-			cmd[2](selectedPlayer)
-			b.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
-			wait(0.2)
-			b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-		end
-	end)
-			end
+		local hrp = lp.Character and lp.Character:Find
