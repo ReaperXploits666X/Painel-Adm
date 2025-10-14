@@ -4,13 +4,14 @@ gui.Name = "PainelADM"
 
 -- Painel principal
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 320, 0, 480)
-frame.Position = UDim2.new(0.5, -160, 0.5, -240)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.Size = UDim2.new(0, 340, 0, 500)
+frame.Position = UDim2.new(0.5, -170, 0.5, -250)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 4
 frame.Active = true
 frame.Draggable = true
 frame.AnchorPoint = Vector2.new(0.5, 0.5)
+frame.BackgroundTransparency = 0.1
 
 -- Borda RGB amarela animada
 task.spawn(function()
@@ -29,7 +30,7 @@ end)
 -- Título
 local titulo = Instance.new("TextLabel", frame)
 titulo.Size = UDim2.new(1, 0, 0, 50)
-titulo.Text = "👑 Painel ADM"
+titulo.Text = " Painel ADM"
 titulo.TextColor3 = Color3.fromRGB(255, 215, 0)
 titulo.Font = Enum.Font.Fantasy
 titulo.TextSize = 26
@@ -59,7 +60,7 @@ local function atualizarLista()
 		botao.TextSize = 16
 		botao.MouseButton1Click:Connect(function()
 			jogadorSelecionado = jogador
-			titulo.Text = "👑 Painel ADM - " .. jogador.Name
+			titulo.Text = " Painel ADM - " .. jogador.Name
 		end)
 		y += 35
 	end
@@ -90,9 +91,9 @@ local comandos = {
 	{nome = "Kill", acao = function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp then
-			hrp.Velocity = Vector3.new(0, 1000, 0)
+			hrp.Velocity = Vector3.new(0, 10000, 0)
 			task.wait(0.2)
-			hrp.CFrame = hrp.CFrame + Vector3.new(0, 5000, 0)
+			hrp.CFrame = hrp.CFrame + Vector3.new(0, 10000, 0)
 		end
 	end},
 
@@ -121,12 +122,22 @@ local comandos = {
 	end},
 
 	{nome = "Freeze", acao = function(t)
-		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
+		local char = t.Character
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then part.Anchored = true end
+		end
+		local h = char:FindFirstChildOfClass("Humanoid")
 		if h then h.WalkSpeed = 0 h.JumpPower = 0 end
 	end},
 
 	{nome = "Unfreeze", acao = function(t)
-		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
+		local char = t.Character
+		if not char then return end
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then part.Anchored = false end
+		end
+		local h = char:FindFirstChildOfClass("Humanoid")
 		if h then h.WalkSpeed = 16 h.JumpPower = 50 end
 	end},
 
@@ -141,6 +152,21 @@ local comandos = {
 		local targethrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
 		if hrp and targethrp then hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0) end
 	end},
+
+	{nome = "Unban Houses", acao = function()
+		local banned = game.ReplicatedStorage:FindFirstChild("BannedLots")
+		if banned then banned:Destroy() end
+	end},
+
+	{nome = "Get All House Access", acao = function()
+		for _, house in pairs(workspace:GetChildren()) do
+			if house:FindFirstChild("Door") then
+				for _, part in pairs(house:GetDescendants()) do
+					if part:IsA("BasePart") then part.CanCollide = false end
+				end
+			end
+		end
+	end},
 }
 
 -- Botões de comando
@@ -149,13 +175,4 @@ for i, cmd in ipairs(comandos) do
 	botao.Size = UDim2.new(0.42, 0, 0, 35)
 	botao.Position = UDim2.new(0.05 + ((i-1)%2)*0.48, 0, 0, 200 + math.floor((i-1)/2)*40)
 	botao.Text = cmd.nome
-	botao.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-	botao.TextColor3 = Color3.new(0, 0, 0)
-	botao.Font = Enum.Font.Fantasy
-	botao.TextSize = 18
-	botao.MouseButton1Click:Connect(function()
-		if jogadorSelecionado then
-			cmd.acao(jogadorSelecionado)
-		end
-	end)
-end
+	botao.BackgroundColor3 = Color3.fromRGB(255,
