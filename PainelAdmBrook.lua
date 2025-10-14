@@ -5,7 +5,6 @@ local lp = Players.LocalPlayer
 local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
 gui.Name = "PainelADM"
 
--- Painel principal
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0, 260, 0, 360)
 main.Position = UDim2.new(0.5, -130, 0.5, -180)
@@ -18,7 +17,6 @@ local border = Instance.new("UIStroke", main)
 border.Thickness = 2
 border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
--- Título com RGB azul
 local title = Instance.new("TextLabel", main)
 title.Size = UDim2.new(1, 0, 0, 35)
 title.Text = "Painel ADM"
@@ -26,7 +24,6 @@ title.Font = Enum.Font.Fantasy
 title.TextSize = 16
 title.BackgroundTransparency = 1
 
--- Botão de fechar painel
 local closeMain = Instance.new("TextButton", main)
 closeMain.Size = UDim2.new(0, 25, 0, 25)
 closeMain.Position = UDim2.new(1, -30, 0, 5)
@@ -39,7 +36,6 @@ closeMain.MouseButton1Click:Connect(function()
 	main.Visible = false
 end)
 
--- Versão
 local version = Instance.new("TextLabel", main)
 version.Size = UDim2.new(0, 100, 0, 20)
 version.Position = UDim2.new(1, -105, 1, -25)
@@ -49,7 +45,6 @@ version.Font = Enum.Font.Fantasy
 version.TextSize = 12
 version.BackgroundTransparency = 1
 
--- RGB dinâmico
 local hue = 0
 RunService.RenderStepped:Connect(function()
 	hue = (hue + 0.005) % 1
@@ -59,7 +54,6 @@ RunService.RenderStepped:Connect(function()
 	title.TextColor3 = blue
 end)
 
--- Painel da lista
 local listaFrame = Instance.new("Frame", gui)
 listaFrame.Size = UDim2.new(0, 260, 0, 300)
 listaFrame.Position = UDim2.new(0.5, -130, 0.5, -150)
@@ -129,7 +123,6 @@ end)
 Players.PlayerAdded:Connect(function() if listaFrame.Visible then updateList() end end)
 Players.PlayerRemoving:Connect(function() if listaFrame.Visible then updateList() end end)
 
--- Botão abrir lista
 local openList = Instance.new("TextButton", main)
 openList.Size = UDim2.new(0.9, 0, 0, 25)
 openList.Position = UDim2.new(0.05, 0, 0, 40)
@@ -144,7 +137,6 @@ openList.MouseButton1Click:Connect(function()
 	updateList()
 end)
 
--- Comandos
 local comandos = {
 	{"KICK", function(t)
 		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
@@ -183,17 +175,9 @@ local comandos = {
 	end},
 	{"TP", function(t)
 		local hrp = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-		local targethrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
-		if hrp and targethrp then hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0) end
-	end},
-}
+		local targethrp = t.Character and t.Character:Find
 
-for i, cmd in ipairs(comandos) do
-	local b = Instance.new("TextButton", main)
-	b.Size = UDim2.new(0.9, 0, 0, 25)
-	b.Position = UDim2.new(0
-
-		for i, cmd in ipairs(comandos) do
+			for i, cmd in ipairs(comandos) do
 	local b = Instance.new("TextButton", main)
 	b.Size = UDim2.new(0.9, 0, 0, 25)
 	b.Position = UDim2.new(0.05, 0, 0, 80 + (i-1)*28)
@@ -202,9 +186,18 @@ for i, cmd in ipairs(comandos) do
 	b.TextColor3 = Color3.new(1, 1, 1)
 	b.Font = Enum.Font.Fantasy
 	b.TextSize = 13
+
+	-- Efeito visual de clique
+	local stroke = Instance.new("UIStroke", b)
+	stroke.Thickness = 1
+	stroke.Color = Color3.fromRGB(255, 255, 255)
+
 	b.MouseButton1Click:Connect(function()
 		if selectedPlayer then
 			cmd[2](selectedPlayer)
+			b.BackgroundColor3 = Color3.fromRGB(0, 255, 127)
+			wait(0.2)
+			b.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
 		end
 	end)
-		end
+			end
