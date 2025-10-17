@@ -1,218 +1,151 @@
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local lp = Players.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
 
-local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
-gui.Name = "PainelADM"
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "PainelAdminV1Demo"
 
--- Painel principal
-local main = Instance.new("Frame", gui)
-main.Size = UDim2.new(0, 260, 0, 360)
-main.Position = UDim2.new(0.5, -130, 0.5, -180)
-main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-main.Active = true
-main.Draggable = true
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 500)
+frame.Position = UDim2.new(0.5, -200, 0.5, -250)
+frame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
 
-local border = Instance.new("UIStroke", main)
-border.Thickness = 2
-border.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, 0, 0, 35)
-title.Text = "Painel ADM"
-title.Font = Enum.Font.Fantasy
-title.TextSize = 16
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 40)
+title.Text = "Painel Admin V1.0 Demo"
 title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(0, 0, 0)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 22
 
-local closeMain = Instance.new("TextButton", main)
-closeMain.Size = UDim2.new(0, 25, 0, 25)
-closeMain.Position = UDim2.new(1, -30, 0, 5)
-closeMain.Text = "X"
-closeMain.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-closeMain.TextColor3 = Color3.new(1, 1, 1)
-closeMain.Font = Enum.Font.Fantasy
-closeMain.TextSize = 14
-closeMain.MouseButton1Click:Connect(function()
-	main.Visible = false
-end)
+local layout = Instance.new("UIListLayout", frame)
+layout.Padding = UDim.new(0, 6)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local version = Instance.new("TextLabel", main)
-version.Size = UDim2.new(0, 100, 0, 20)
-version.Position = UDim2.new(1, -105, 1, -25)
-version.Text = "V1.00"
-version.TextColor3 = Color3.new(1, 1, 1)
-version.Font = Enum.Font.Fantasy
-version.TextSize = 12
-version.BackgroundTransparency = 1
-
--- RGB animado
-local hue = 0
-RunService.RenderStepped:Connect(function()
-	hue = (hue + 0.005) % 1
-	local yellow = Color3.fromHSV((hue + 0.1) % 1, 1, 1)
-	local blue = Color3.fromHSV((hue + 0.6) % 1, 1, 1)
-	border.Color = yellow
-	title.TextColor3 = blue
-end)
-
--- Painel da lista
-local listaFrame = Instance.new("Frame", gui)
-listaFrame.Size = main.Size
-listaFrame.Position = main.Position
-listaFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-listaFrame.Visible = false
-
-local listaBorder = Instance.new("UIStroke", listaFrame)
-listaBorder.Thickness = 2
-listaBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-local listaTitle = Instance.new("TextLabel", listaFrame)
-listaTitle.Size = UDim2.new(1, 0, 0, 35)
-listaTitle.Text = "Painel ADM"
-listaTitle.Font = Enum.Font.Fantasy
-listaTitle.TextSize = 16
-listaTitle.BackgroundTransparency = 1
-
-RunService.RenderStepped:Connect(function()
-	listaBorder.Color = border.Color
-	listaTitle.TextColor3 = title.TextColor3
-end)
-
-local closeLista = Instance.new("TextButton", listaFrame)
-closeLista.Size = UDim2.new(0.9, 0, 0, 25)
-closeLista.Position = UDim2.new(0.05, 0, 0, 40)
-closeLista.Text = "FECHAR LISTA"
-closeLista.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-closeLista.TextColor3 = Color3.new(1, 1, 1)
-closeLista.Font = Enum.Font.Fantasy
-closeLista.TextSize = 13
-closeLista.MouseButton1Click:Connect(function()
-	listaFrame.Visible = false
-	main.Visible = true
-end)
-
-local scroll = Instance.new("ScrollingFrame", listaFrame)
-scroll.Size = UDim2.new(0.9, 0, 0, 230)
-scroll.Position = UDim2.new(0.05, 0, 0, 75)
-scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-scroll.ScrollBarThickness = 6
-scroll.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-
+-- Lista de jogadores
 local selectedPlayer = nil
+local dropdown = Instance.new("TextButton", frame)
+dropdown.Size = UDim2.new(1, -20, 0, 40)
+dropdown.Text = "Selecionar Jogador"
+dropdown.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+dropdown.TextColor3 = Color3.new(0, 0, 0)
+dropdown.Font = Enum.Font.SourceSans
+dropdown.TextSize = 18
 
-local function updateList()
-	scroll:ClearAllChildren()
-	local y = 0
-	for _, plr in pairs(Players:GetPlayers()) do
-		local b = Instance.new("TextButton", scroll)
-		b.Size = UDim2.new(1, 0, 0, 22)
-		b.Position = UDim2.new(0, 0, 0, y)
-		b.Text = plr.Name
-		b.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-		b.TextColor3 = Color3.new(1, 1, 1)
-		b.Font = Enum.Font.Fantasy
-		b.TextSize = 13
-		b.MouseButton1Click:Connect(function()
-			selectedPlayer = plr
-			for _, btn in pairs(scroll:GetChildren()) do
-				if btn:IsA("TextButton") then
-					btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-				end
+local function atualizarLista()
+	dropdown:ClearAllChildren()
+	for _, p in pairs(Players:GetPlayers()) do
+		local opt = Instance.new("TextButton", dropdown)
+		opt.Size = UDim2.new(1, 0, 0, 30)
+		opt.Text = p.Name
+		opt.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+		opt.TextColor3 = Color3.new(0, 0, 0)
+		opt.MouseButton1Click:Connect(function()
+			selectedPlayer = p.Name
+			dropdown.Text = "Selecionado: " .. p.Name
+			for _, child in pairs(dropdown:GetChildren()) do
+				if child:IsA("TextButton") then child.Visible = false end
 			end
-			b.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 		end)
-		y += 24
 	end
-	scroll.CanvasSize = UDim2.new(0, 0, 0, y)
 end
 
-Players.PlayerAdded:Connect(function() if listaFrame.Visible then updateList() end end)
-Players.PlayerRemoving:Connect(function() if listaFrame.Visible then updateList() end end)
-
-local openList = Instance.new("TextButton", main)
-openList.Size = UDim2.new(0.9, 0, 0, 25)
-openList.Position = UDim2.new(0.05, 0, 0, 40)
-openList.Text = "LISTA DE JOGADORES"
-openList.BackgroundColor3 = Color3.fromRGB(255, 170, 0)
-openList.TextColor3 = Color3.new(1, 1, 1)
-openList.Font = Enum.Font.Fantasy
-openList.TextSize = 13
-openList.MouseButton1Click:Connect(function()
-	main.Visible = false
-	listaFrame.Visible = true
-	updateList()
+dropdown.MouseButton1Click:Connect(function()
+	for _, child in pairs(dropdown:GetChildren()) do
+		if child:IsA("TextButton") then
+			child.Visible = not child.Visible
+		end
+	end
 end)
 
--- Botões ADM com borda amarela
-local comandos = {
-	{"KICK", function(t)
-		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
-		if hrp then hrp.CFrame = CFrame.new(9999, 9999, 9999) end
-	end},
-	{"JAIL", function(t)
-		local hrp = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
-		if hrp then
-			local cage = Instance.new("Part", workspace)
-			cage.Size = Vector3.new(6, 6, 6)
-			cage.Anchored = true
-			cage.Position = hrp.Position
-			cage.Transparency = 0.5
-			cage.Color = Color3.fromRGB(0, 170, 255)
-			cage.Name = "JailCube"
-		end
-	end},
-	{"UNJAIL", function()
-		for _, v in pairs(workspace:GetChildren()) do
-			if v.Name == "JailCube" then v:Destroy() end
-		end
-	end},
-	{"FREEZE", function(t)
-		for _, part in pairs(t.Character:GetDescendants()) do
-			if part:IsA("BasePart") then part.Anchored = true end
-		end
-	end},
-	{"UNFREEZE", function(t)
-		for _, part in pairs(t.Character:GetDescendants()) do
-			if part:IsA("BasePart") then part.Anchored = false end
-		end
-	end},
-	{"KILL", function(t)
-		local h = t.Character and t.Character:FindFirstChildOfClass("Humanoid")
-		if h then h:TakeDamage(9999) end
-	end},
-	{"TP", function(t)
-		local hrp = lp.Character and lp.Character
+Players.PlayerAdded:Connect(atualizarLista)
+Players.PlayerRemoving:Connect(atualizarLista)
+atualizarLista()
 
-			if hrp and targethrp then
-			hrp.CFrame = targethrp.CFrame + Vector3.new(2, 0, 0)
-		end
-	end},
-}
-
-for i, cmd in ipairs(comandos) do
-	local quadro = Instance.new("Frame", main)
-	quadro.Size = UDim2.new(0.9, 0, 0, 25)
-	quadro.Position = UDim2.new(0.05, 0, 0, 80 + (i-1)*30)
-	quadro.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-
-	local borda = Instance.new("UIStroke", quadro)
-	borda.Thickness = 2
-	borda.Color = Color3.fromRGB(255, 170, 0)
-
-	local botao = Instance.new("TextButton", quadro)
-	botao.Size = UDim2.new(1, 0, 1, 0)
-	botao.Text = cmd[1]
-	botao.BackgroundTransparency = 1
-	botao.TextColor3 = Color3.new(1, 1, 1)
-	botao.Font = Enum.Font.Fantasy
-	botao.TextSize = 13
-
-	botao.MouseButton1Click:Connect(function()
-		if selectedPlayer then
-			cmd[2](selectedPlayer)
-			borda.Color = Color3.fromRGB(0, 255, 127)
-			wait(0.2)
-			borda.Color = Color3.fromRGB(255, 170, 0)
-		end
-	end)
+-- Botões
+local function criarBotao(nome, acao)
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(1, -20, 0, 40)
+	btn.Text = nome
+	btn.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+	btn.TextColor3 = Color3.new(0, 0, 0)
+	btn.Font = Enum.Font.SourceSans
+	btn.TextSize = 18
+	btn.MouseButton1Click:Connect(acao)
 end
+
+criarBotao("Ativar Voo", function()
+	ReplicatedStorage.AdminCommands:FireServer("Fly")
+end)
+
+criarBotao("Aumentar Velocidade", function()
+	ReplicatedStorage.AdminCommands:FireServer("Speed", 100)
+end)
+
+criarBotao("Invisibilidade", function()
+	ReplicatedStorage.AdminCommands:FireServer("Invis")
+end)
+
+criarBotao("Resetar Personagem", function()
+	ReplicatedStorage.AdminCommands:FireServer("Reset")
+end)
+
+criarBotao("Killar Jogador", function()
+	if selectedPlayer then
+		ReplicatedStorage.AdminCommands:FireServer("Say", ";kill " .. selectedPlayer)
+		ReplicatedStorage.AdminCommands:FireServer("Kill", selectedPlayer)
+	end
+end)
+
+criarBotao("Kickar Jogador", function()
+	if selectedPlayer then
+		ReplicatedStorage.AdminCommands:FireServer("Say", ";kick " .. selectedPlayer)
+		ReplicatedStorage.AdminCommands:FireServer("Kick", selectedPlayer)
+	end
+end)
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AdminCommands = ReplicatedStorage:WaitForChild("AdminCommands")
+
+AdminCommands.OnServerEvent:Connect(function(player, comando, valor)
+	if player.Name ~= "SeuNomeAqui" then return end -- Substitua pelo seu nome de usuário
+
+	if comando == "Fly" then
+		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if hrp then hrp.Velocity = Vector3.new(0, 50, 0) end
+
+	elseif comando == "Speed" then
+		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+		if hum then hum.WalkSpeed = valor end
+
+	elseif comando == "Invis" then
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then part.Transparency = 1 end
+		end
+
+	elseif comando == "Reset" then
+		player:LoadCharacter()
+
+	elseif comando == "Kill" then
+		local target = game.Players:FindFirstChild(valor)
+		if target and target.Character then
+			local hum = target.Character:FindFirstChildOfClass("Humanoid")
+			if hum then hum.Health = 0 end
+		end
+
+	elseif comando == "Kick" then
+		local target = game.Players:FindFirstChild(valor)
+		if target then
+			target:Kick("Você foi expulso pelo admin.")
+		end
+
+	elseif comando == "Say" then
+		local head = player.Character and player.Character:FindFirstChild("Head")
+		if head then
+			game:GetService("Chat"):Chat(head, valor, Enum.ChatColor.Red)
+		end
+	end
+end)
