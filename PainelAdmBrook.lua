@@ -1,12 +1,10 @@
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
--- Criar GUI principal
-local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "PainelAdminV1Demo"
 
--- Botão para abrir/fechar o painel
 local toggleButton = Instance.new("TextButton", gui)
 toggleButton.Size = UDim2.new(0, 120, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
@@ -16,7 +14,6 @@ toggleButton.TextColor3 = Color3.new(1, 1, 1)
 toggleButton.Font = Enum.Font.SourceSansBold
 toggleButton.TextSize = 18
 
--- Painel principal
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 400, 0, 500)
 frame.Position = UDim2.new(0.5, -200, 0.5, -250)
@@ -43,7 +40,6 @@ local layout = Instance.new("UIListLayout", frame)
 layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Lista de jogadores (ScrollingFrame)
 local selectedPlayer = nil
 local playerList = Instance.new("ScrollingFrame", frame)
 playerList.Size = UDim2.new(1, -20, 0, 120)
@@ -96,7 +92,6 @@ Players.PlayerAdded:Connect(atualizarLista)
 Players.PlayerRemoving:Connect(atualizarLista)
 atualizarLista()
 
--- Função para criar botões
 local function criarBotao(nome, acao)
 	local btn = Instance.new("TextButton", frame)
 	btn.Size = UDim2.new(1, -20, 0, 40)
@@ -108,33 +103,48 @@ local function criarBotao(nome, acao)
 	btn.MouseButton1Click:Connect(acao)
 end
 
--- Botões de ação
 criarBotao("Ativar Voo", function()
-	ReplicatedStorage.AdminCommands:FireServer("Fly")
+	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		hrp.Velocity = Vector3.new(0, 100, 0)
+	end
 end)
 
 criarBotao("Aumentar Velocidade", function()
-	ReplicatedStorage.AdminCommands:FireServer("Speed", 100)
+	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+	if hum then
+		hum.WalkSpeed = 100
+	end
 end)
 
 criarBotao("Invisibilidade", function()
-	ReplicatedStorage.AdminCommands:FireServer("Invis")
+	for _, part in pairs(player.Character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.Transparency = 1
+		end
+	end
 end)
 
 criarBotao("Resetar Personagem", function()
-	ReplicatedStorage.AdminCommands:FireServer("Reset")
+	player:LoadCharacter()
 end)
 
 criarBotao("Killar Jogador", function()
 	if selectedPlayer then
-		ReplicatedStorage.AdminCommands:FireServer("Say", ";kill " .. selectedPlayer)
-		ReplicatedStorage.AdminCommands:FireServer("Kill", selectedPlayer)
+		local head = player.Character and player.Character:FindFirstChild("Head")
+		if head then
+			game:GetService("Chat"):Chat(head, ";kill " .. selectedPlayer, Enum.ChatColor.Red)
+		end
 	end
 end)
 
 criarBotao("Kickar Jogador", function()
 	if selectedPlayer then
-		ReplicatedStorage.AdminCommands:FireServer("Say", ";kick " .. selectedPlayer)
-		ReplicatedStorage.AdminCommands:FireServer("Kick", selectedPlayer)
+		local head = player.Character and player.Character:FindFirstChild("Head")
+		if head then
+			game:GetService("Chat"):Chat(head, ";kick " .. selectedPlayer, Enum.ChatColor.Red)
+		end
 	end
 end)
+
+playerList.Parent = frame
