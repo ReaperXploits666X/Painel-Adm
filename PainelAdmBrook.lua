@@ -2,16 +2,34 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
 
+-- Criar GUI principal
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 gui.Name = "PainelAdminV1Demo"
 
+-- Botão para abrir/fechar o painel
+local toggleButton = Instance.new("TextButton", gui)
+toggleButton.Size = UDim2.new(0, 120, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.Text = "Abrir Painel"
+toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 18
+
+-- Painel principal
 local frame = Instance.new("Frame", gui)
 frame.Size = UDim2.new(0, 400, 0, 500)
 frame.Position = UDim2.new(0.5, -200, 0.5, -250)
 frame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
 frame.BorderSizePixel = 0
+frame.Visible = false
 frame.Active = true
 frame.Draggable = true
+
+toggleButton.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+	toggleButton.Text = frame.Visible and "Fechar Painel" or "Abrir Painel"
+end)
 
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1, 0, 0, 40)
@@ -25,47 +43,60 @@ local layout = Instance.new("UIListLayout", frame)
 layout.Padding = UDim.new(0, 6)
 layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Lista de jogadores
+-- Lista de jogadores (ScrollingFrame)
 local selectedPlayer = nil
-local dropdown = Instance.new("TextButton", frame)
-dropdown.Size = UDim2.new(1, -20, 0, 40)
-dropdown.Text = "Selecionar Jogador"
-dropdown.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-dropdown.TextColor3 = Color3.new(0, 0, 0)
-dropdown.Font = Enum.Font.SourceSans
-dropdown.TextSize = 18
+local playerList = Instance.new("ScrollingFrame", frame)
+playerList.Size = UDim2.new(1, -20, 0, 120)
+playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
+playerList.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+playerList.BorderSizePixel = 0
+playerList.Visible = false
+
+local listLayout = Instance.new("UIListLayout", playerList)
+listLayout.SortOrder = Enum.SortOrder.LayoutOrder
+listLayout.Padding = UDim.new(0, 4)
+
+local toggleList = Instance.new("TextButton", frame)
+toggleList.Size = UDim2.new(1, -20, 0, 40)
+toggleList.Text = "Mostrar Lista de Jogadores"
+toggleList.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
+toggleList.TextColor3 = Color3.new(0, 0, 0)
+toggleList.Font = Enum.Font.SourceSans
+toggleList.TextSize = 18
+
+toggleList.MouseButton1Click:Connect(function()
+	playerList.Visible = not playerList.Visible
+	toggleList.Text = playerList.Visible and "Ocultar Lista de Jogadores" or "Mostrar Lista de Jogadores"
+end)
 
 local function atualizarLista()
-	dropdown:ClearAllChildren()
+	for _, child in pairs(playerList:GetChildren()) do
+		if child:IsA("TextButton") then child:Destroy() end
+	end
+
 	for _, p in pairs(Players:GetPlayers()) do
-		local opt = Instance.new("TextButton", dropdown)
-		opt.Size = UDim2.new(1, 0, 0, 30)
-		opt.Text = p.Name
-		opt.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-		opt.TextColor3 = Color3.new(0, 0, 0)
-		opt.MouseButton1Click:Connect(function()
+		local btn = Instance.new("TextButton", playerList)
+		btn.Size = UDim2.new(1, -10, 0, 30)
+		btn.Text = p.Name
+		btn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
+		btn.TextColor3 = Color3.new(0, 0, 0)
+		btn.Font = Enum.Font.SourceSans
+		btn.TextSize = 16
+		btn.MouseButton1Click:Connect(function()
 			selectedPlayer = p.Name
-			dropdown.Text = "Selecionado: " .. p.Name
-			for _, child in pairs(dropdown:GetChildren()) do
-				if child:IsA("TextButton") then child.Visible = false end
-			end
+			toggleList.Text = "Selecionado: " .. p.Name
+			playerList.Visible = false
 		end)
 	end
-end
 
-dropdown.MouseButton1Click:Connect(function()
-	for _, child in pairs(dropdown:GetChildren()) do
-		if child:IsA("TextButton") then
-			child.Visible = not child.Visible
-		end
-	end
-end)
+	playerList.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 34)
+end
 
 Players.PlayerAdded:Connect(atualizarLista)
 Players.PlayerRemoving:Connect(atualizarLista)
 atualizarLista()
 
--- Botões
+-- Função para criar botões
 local function criarBotao(nome, acao)
 	local btn = Instance.new("TextButton", frame)
 	btn.Size = UDim2.new(1, -20, 0, 40)
@@ -77,6 +108,7 @@ local function criarBotao(nome, acao)
 	btn.MouseButton1Click:Connect(acao)
 end
 
+-- Botões de ação
 criarBotao("Ativar Voo", function()
 	ReplicatedStorage.AdminCommands:FireServer("Fly")
 end)
@@ -104,48 +136,5 @@ criarBotao("Kickar Jogador", function()
 	if selectedPlayer then
 		ReplicatedStorage.AdminCommands:FireServer("Say", ";kick " .. selectedPlayer)
 		ReplicatedStorage.AdminCommands:FireServer("Kick", selectedPlayer)
-	end
-end)
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local AdminCommands = ReplicatedStorage:WaitForChild("AdminCommands")
-
-AdminCommands.OnServerEvent:Connect(function(player, comando, valor)
-	if player.Name ~= "SeuNomeAqui" then return end -- Substitua pelo seu nome de usuário
-
-	if comando == "Fly" then
-		local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-		if hrp then hrp.Velocity = Vector3.new(0, 50, 0) end
-
-	elseif comando == "Speed" then
-		local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-		if hum then hum.WalkSpeed = valor end
-
-	elseif comando == "Invis" then
-		for _, part in pairs(player.Character:GetDescendants()) do
-			if part:IsA("BasePart") then part.Transparency = 1 end
-		end
-
-	elseif comando == "Reset" then
-		player:LoadCharacter()
-
-	elseif comando == "Kill" then
-		local target = game.Players:FindFirstChild(valor)
-		if target and target.Character then
-			local hum = target.Character:FindFirstChildOfClass("Humanoid")
-			if hum then hum.Health = 0 end
-		end
-
-	elseif comando == "Kick" then
-		local target = game.Players:FindFirstChild(valor)
-		if target then
-			target:Kick("Você foi expulso pelo admin.")
-		end
-
-	elseif comando == "Say" then
-		local head = player.Character and player.Character:FindFirstChild("Head")
-		if head then
-			game:GetService("Chat"):Chat(head, valor, Enum.ChatColor.Red)
-		end
 	end
 end)
