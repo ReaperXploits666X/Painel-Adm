@@ -7,11 +7,11 @@ local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local target = nil
 
--- Interface Kavo UI
+-- Interface estilo Nytherune (Kavo UI)
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("VoidReaper Hub Admin 1.0", "DarkTheme")
 
--- Painel principal
+-- Aba principal
 local AdminTab = Window:NewTab("Admin")
 local AdminSection = AdminTab:NewSection("Selecionar Jogador")
 
@@ -158,7 +158,7 @@ CommandSection:NewSlider("Speed", "Velocidade do personagem", 100, 16, function(
     lp.Character.Humanoid.WalkSpeed = val
 end)
 
--- Créditos e controle
+-- Aba de controle com minimizar e fechar
 local ControlTab = Window:NewTab("Painel")
 local ControlSection = ControlTab:NewSection("Feito por Reaper Xploits & NovaheX")
 
