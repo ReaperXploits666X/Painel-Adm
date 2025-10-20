@@ -1,6 +1,6 @@
 --[[
     VoidReaper Hub Admin 1.0
-    Feito por Reaper Xploits & NovaheX
+    Script feito por Reaper Xploits & NovaheX
 ]]
 
 local Players = game:GetService("Players")
@@ -158,9 +158,14 @@ CommandSection:NewSlider("Speed", "Velocidade do personagem", 100, 16, function(
     lp.Character.Humanoid.WalkSpeed = val
 end)
 
--- Aba de controle com minimizar e fechar
+-- Aba de Créditos
+local CreditsTab = Window:NewTab("Créditos")
+local CreditsSection = CreditsTab:NewSection("Informações")
+CreditsSection:NewLabel("Script VoidReaper Hub foi feito por Reaper Xploits & NovaheX")
+
+-- Aba de Controle
 local ControlTab = Window:NewTab("Painel")
-local ControlSection = ControlTab:NewSection("Feito por Reaper Xploits & NovaheX")
+local ControlSection = ControlTab:NewSection("Controles")
 
 ControlSection:NewButton("Minimizar Painel", "Esconde o painel temporariamente", function()
     for _, gui in pairs(game.CoreGui:GetChildren()) do
