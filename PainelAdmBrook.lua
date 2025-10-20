@@ -1,150 +1,226 @@
+--[[
+    VoidReaper Hub Admin
+    Criado por Reaper Xploits
+    Baseado no Nytherune Hub original
+]]
+
+-- Carrega a biblioteca de interface
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("VoidReaper Hub Admin", "DarkTheme")
+
+-- Abas principais
+local AdminTab = Window:NewTab("Admin")
+local AvatarTab = Window:NewTab("Avatar")
+local HouseTab = Window:NewTab("Casas")
+local SettingsTab = Window:NewTab("Configurações")
+
+-- Carrega os módulos externos
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Minemods/VoidReaperHub/main/admin.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Minemods/VoidReaperHub/main/avatar.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Minemods/VoidReaperHub/main/house.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Minemods/VoidReaperHub/main/settings.lua"))()
+
+--[[
+    VoidReaper Hub Admin - Comandos
+    Criado por Reaper Xploits
+    Baseado no Nytherune Hub original
+]]
+
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
+local lp = Players.LocalPlayer
+local mouse = lp:GetMouse()
+local target = nil
 
-local gui = Instance.new("ScreenGui", game.CoreGui)
-gui.Name = "PainelAdminV1Demo"
+local AdminSection = Window:FindFirstChild("Admin"):FindFirstChildOfClass("Section")
 
-local toggleButton = Instance.new("TextButton", gui)
-toggleButton.Size = UDim2.new(0, 120, 0, 40)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Abrir Painel"
-toggleButton.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
-toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.TextSize = 18
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 400, 0, 500)
-frame.Position = UDim2.new(0.5, -200, 0.5, -250)
-frame.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
-frame.BorderSizePixel = 0
-frame.Visible = false
-frame.Active = true
-frame.Draggable = true
-
-toggleButton.MouseButton1Click:Connect(function()
-	frame.Visible = not frame.Visible
-	toggleButton.Text = frame.Visible and "Fechar Painel" or "Abrir Painel"
+AdminSection:NewButton("Selecionar Jogador", "Clique em um jogador para selecionar", function()
+    mouse.Button1Down:Connect(function()
+        local part = mouse.Target
+        if part and part.Parent and Players:GetPlayerFromCharacter(part.Parent) then
+            target = Players:GetPlayerFromCharacter(part.Parent)
+            print("Selecionado:", target.Name)
+        end
+    end)
 end)
 
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 40)
-title.Text = "Painel Admin V1.0 Demo"
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(0, 0, 0)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 22
-
-local layout = Instance.new("UIListLayout", frame)
-layout.Padding = UDim.new(0, 6)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-local selectedPlayer = nil
-local playerList = Instance.new("ScrollingFrame", frame)
-playerList.Size = UDim2.new(1, -20, 0, 120)
-playerList.CanvasSize = UDim2.new(0, 0, 0, 0)
-playerList.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-playerList.BorderSizePixel = 0
-playerList.Visible = false
-
-local listLayout = Instance.new("UIListLayout", playerList)
-listLayout.SortOrder = Enum.SortOrder.LayoutOrder
-listLayout.Padding = UDim.new(0, 4)
-
-local toggleList = Instance.new("TextButton", frame)
-toggleList.Size = UDim2.new(1, -20, 0, 40)
-toggleList.Text = "Mostrar Lista de Jogadores"
-toggleList.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
-toggleList.TextColor3 = Color3.new(0, 0, 0)
-toggleList.Font = Enum.Font.SourceSans
-toggleList.TextSize = 18
-
-toggleList.MouseButton1Click:Connect(function()
-	playerList.Visible = not playerList.Visible
-	toggleList.Text = playerList.Visible and "Ocultar Lista de Jogadores" or "Mostrar Lista de Jogadores"
+AdminSection:NewButton("Bring", "Teleporta o jogador até você", function()
+    if target and target.Character then
+        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position)
+    end
 end)
 
-local function atualizarLista()
-	for _, child in pairs(playerList:GetChildren()) do
-		if child:IsA("TextButton") then child:Destroy() end
-	end
-
-	for _, p in pairs(Players:GetPlayers()) do
-		local btn = Instance.new("TextButton", playerList)
-		btn.Size = UDim2.new(1, -10, 0, 30)
-		btn.Text = p.Name
-		btn.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-		btn.TextColor3 = Color3.new(0, 0, 0)
-		btn.Font = Enum.Font.SourceSans
-		btn.TextSize = 16
-		btn.MouseButton1Click:Connect(function()
-			selectedPlayer = p.Name
-			toggleList.Text = "Selecionado: " .. p.Name
-			playerList.Visible = false
-		end)
-	end
-
-	playerList.CanvasSize = UDim2.new(0, 0, 0, #Players:GetPlayers() * 34)
-end
-
-Players.PlayerAdded:Connect(atualizarLista)
-Players.PlayerRemoving:Connect(atualizarLista)
-atualizarLista()
-
-local function criarBotao(nome, acao)
-	local btn = Instance.new("TextButton", frame)
-	btn.Size = UDim2.new(1, -20, 0, 40)
-	btn.Text = nome
-	btn.BackgroundColor3 = Color3.fromRGB(180, 180, 180)
-	btn.TextColor3 = Color3.new(0, 0, 0)
-	btn.Font = Enum.Font.SourceSans
-	btn.TextSize = 18
-	btn.MouseButton1Click:Connect(acao)
-end
-
-criarBotao("Ativar Voo", function()
-	local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	if hrp then
-		hrp.Velocity = Vector3.new(0, 100, 0)
-	end
+AdminSection:NewButton("Fling", "Arremessa o jogador", function()
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local v = Instance.new("BodyVelocity")
+        v.Velocity = Vector3.new(9999,9999,9999)
+        v.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        v.Parent = target.Character.HumanoidRootPart
+        wait(0.2)
+        v:Destroy()
+    end
 end)
 
-criarBotao("Aumentar Velocidade", function()
-	local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-	if hum then
-		hum.WalkSpeed = 100
-	end
+AdminSection:NewButton("Kill", "Elimina o jogador", function()
+    if target and target.Character and target.Character:FindFirstChild("Humanoid") then
+        target.Character.Humanoid.Health = 0
+    end
 end)
 
-criarBotao("Invisibilidade", function()
-	for _, part in pairs(player.Character:GetDescendants()) do
-		if part:IsA("BasePart") then
-			part.Transparency = 1
-		end
-	end
+AdminSection:NewButton("Btools", "Dá ferramentas de construção", function()
+    local tool = Instance.new("HopperBin", lp.Backpack)
+    tool.BinType = 2
 end)
 
-criarBotao("Resetar Personagem", function()
-	player:LoadCharacter()
+AdminSection:NewButton("Givem", "Dá armas ao jogador", function()
+    local gun = game:GetService("ReplicatedStorage"):FindFirstChild("Gun")
+    if gun then
+        gun:Clone().Parent = lp.Backpack
+    end
 end)
 
-criarBotao("Killar Jogador", function()
-	if selectedPlayer then
-		local head = player.Character and player.Character:FindFirstChild("Head")
-		if head then
-			game:GetService("Chat"):Chat(head, ";kill " .. selectedPlayer, Enum.ChatColor.Red)
-		end
-	end
+AdminSection:NewButton("View", "Ver jogador selecionado", function()
+    if target and target.Character then
+        workspace.CurrentCamera.CameraSubject = target.Character:FindFirstChild("Humanoid")
+    end
 end)
 
-criarBotao("Kickar Jogador", function()
-	if selectedPlayer then
-		local head = player.Character and player.Character:FindFirstChild("Head")
-		if head then
-			game:GetService("Chat"):Chat(head, ";kick " .. selectedPlayer, Enum.ChatColor.Red)
-		end
-	end
+AdminSection:NewSlider("Speed", "Altera a velocidade do personagem", 100, 16, function(val)
+    lp.Character.Humanoid.WalkSpeed = val
 end)
 
-playerList.Parent = frame
+--[[
+    VoidReaper Hub Admin - Avatar
+    Criado por Reaper Xploits
+    Baseado no Nytherune Hub original
+]]
+
+local AvatarSection = Window:FindFirstChild("Avatar"):FindFirstChildOfClass("Section")
+local lp = game:GetService("Players").LocalPlayer
+
+AvatarSection:NewButton("Remover Roupas", "Remove todas as roupas do personagem", function()
+    for _, item in pairs(lp.Character:GetChildren()) do
+        if item:IsA("Shirt") or item:IsA("Pants") or item:IsA("Accessory") or item:IsA("Hat") then
+            item:Destroy()
+        end
+    end
+end)
+
+AvatarSection:NewButton("Resetar Personagem", "Reseta o personagem", function()
+    lp.Character:BreakJoints()
+end)
+
+AvatarSection:NewButton("Tamanho Pequeno", "Deixa o personagem pequeno", function()
+    for _, part in pairs(lp.Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Size = part.Size * 0.5
+        end
+    end
+end)
+
+AvatarSection:NewButton("Tamanho Grande", "Deixa o personagem gigante", function()
+    for _, part in pairs(lp.Character:GetChildren()) do
+        if part:IsA("BasePart") then
+            part.Size = part.Size * 2
+        end
+    end
+end)
+
+AvatarSection:NewButton("Animação Dança", "Faz o personagem dançar", function()
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://3189773368" -- Exemplo de dança
+    local track = lp.Character:FindFirstChildOfClass("Humanoid"):LoadAnimation(anim)
+    track:Play()
+end)
+
+AvatarSection:NewButton("Animação Flutuar", "Faz o personagem flutuar", function()
+    local anim = Instance.new("Animation")
+    anim.AnimationId = "rbxassetid://507771019" -- Exemplo de flutuar
+    local track = lp.Character:FindFirstChildOfClass("Humanoid"):LoadAnimation(anim)
+    track:Play()
+end)
+
+--[[
+    VoidReaper Hub Admin - Casas
+    Criado por Reaper Xploits
+    Baseado no Nytherune Hub original
+]]
+
+local HouseSection = Window:FindFirstChild("Casas"):FindFirstChildOfClass("Section")
+local lp = game:GetService("Players").LocalPlayer
+
+HouseSection:NewButton("Teleportar para Casa", "Teleporta para sua casa", function()
+    local house = workspace:FindFirstChild(lp.Name .. "House")
+    if house and house:FindFirstChild("Door") then
+        lp.Character:MoveTo(house.Door.Position + Vector3.new(0, 5, 0))
+    else
+        warn("Casa não encontrada.")
+    end
+end)
+
+HouseSection:NewButton("Abrir Todas as Portas", "Abre todas as portas da casa", function()
+    local house = workspace:FindFirstChild(lp.Name .. "House")
+    if house then
+        for _, obj in pairs(house:GetDescendants()) do
+            if obj:IsA("ClickDetector") and obj.Parent.Name == "Door" then
+                fireclickdetector(obj)
+            end
+        end
+    end
+end)
+
+HouseSection:NewButton("Entrar na Casa", "Entra na casa pela porta", function()
+    local house = workspace:FindFirstChild(lp.Name .. "House")
+    if house and house:FindFirstChild("Door") then
+        lp.Character:MoveTo(house.Door.Position + Vector3.new(0, 2, 0))
+    end
+end)
+
+HouseSection:NewButton("Sair da Casa", "Teleporta para fora da casa", function()
+    lp.Character:MoveTo(Vector3.new(0, 10, 0)) -- posição genérica fora da casa
+end)
+
+--[[
+    VoidReaper Hub Admin - Configurações
+    Criado por Reaper Xploits
+    Baseado no Nytherune Hub original
+]]
+
+local SettingsSection = Window:FindFirstChild("Configurações"):FindFirstChildOfClass("Section")
+local lp = game:GetService("Players").LocalPlayer
+
+-- Proteção contra kick
+SettingsSection:NewButton("Anti-Kick", "Impede que você seja expulso", function()
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
+    local old = mt.__namecall
+    mt.__namecall = newcclosure(function(self, ...)
+        local args = {...}
+        if getnamecallmethod() == "Kick" then
+            return
+        end
+        return old(self, unpack(args))
+    end)
+end)
+
+-- Proteção contra crash
+SettingsSection:NewButton("Anti-Crash", "Bloqueia tentativas de crash", function()
+    game:GetService("RunService"):SetThrottleFramerateEnabled(false)
+end)
+
+-- Sistema de chave (opcional)
+SettingsSection:NewButton("Verificar Chave", "Verifica se você tem acesso", function()
+    local chave = "VoidReaperX"
+    local input = tostring(game:GetService("Players").LocalPlayer.Name)
+    if input == chave then
+        print("Acesso liberado para:", input)
+    else
+        warn("Chave inválida para:", input)
+        game:GetService("Players").LocalPlayer:Kick("Chave inválida.")
+    end
+end)
+
+-- Resetar configurações
+SettingsSection:NewButton("Resetar Configurações", "Reseta proteções e velocidade", function()
+    game:GetService("RunService"):SetThrottleFramerateEnabled(true)
+    lp.Character.Humanoid.WalkSpeed = 16
+end)
