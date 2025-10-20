@@ -7,15 +7,13 @@ local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
 local target = nil
 
--- Interface estilo Nytherune (Kavo UI)
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("VoidReaper Hub Admin 1.0", "DarkTheme")
 
--- Aba principal
-local AdminTab = Window:NewTab("Admin")
-local AdminSection = AdminTab:NewSection("Selecionar Jogador")
+-- Funções Básicas
+local BasicTab = Window:NewTab("Funções Básicas")
+local BasicSection = BasicTab:NewSection("Selecionar Jogador")
 
--- Lista suspensa de jogadores
 local playerNames = {}
 for _, p in pairs(Players:GetPlayers()) do
     if p ~= lp then
@@ -23,7 +21,7 @@ for _, p in pairs(Players:GetPlayers()) do
     end
 end
 
-local dropdown = AdminSection:NewDropdown("Jogadores", "Escolha um jogador", playerNames, function(selected)
+local dropdown = BasicSection:NewDropdown("Jogadores", "Escolha um jogador", playerNames, function(selected)
     target = Players:FindFirstChild(selected)
 end)
 
@@ -42,24 +40,31 @@ Players.PlayerRemoving:Connect(function(p)
     dropdown:Refresh(playerNames)
 end)
 
--- Comandos
-local CommandSection = AdminTab:NewSection("Comandos")
-
 local function safeTarget()
     return target and target.Character
 end
 
-CommandSection:NewButton("Kick", "Expulsa o jogador", function()
-    if target then target:Kick("Você foi expulso pelo VoidReaper Hub.") end
+local function createBasic(name, func)
+    BasicSection:NewButton(name, "", func)
+end
+
+createBasic("Kick", function()
+    if target then target:Kick("Expulso pelo VoidReaper Hub.") end
 end)
 
-CommandSection:NewButton("Kill", "Mata o jogador", function()
+createBasic("Bring", function()
+    if safeTarget() then
+        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position + Vector3.new(2,0,0))
+    end
+end)
+
+createBasic("Kill", function()
     if safeTarget() and target.Character:FindFirstChild("Humanoid") then
         target.Character.Humanoid.Health = 0
     end
 end)
 
-CommandSection:NewButton("KillPlus", "Mata com explosão", function()
+createBasic("KillPlus", function()
     if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
         local explosion = Instance.new("Explosion", workspace)
         explosion.Position = target.Character.HumanoidRootPart.Position
@@ -67,30 +72,7 @@ CommandSection:NewButton("KillPlus", "Mata com explosão", function()
     end
 end)
 
-CommandSection:NewButton("Fling", "Arremessa o jogador", function()
-    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
-        local v = Instance.new("BodyVelocity")
-        v.Velocity = Vector3.new(9999,9999,9999)
-        v.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        v.Parent = target.Character.HumanoidRootPart
-        wait(0.2)
-        v:Destroy()
-    end
-end)
-
-CommandSection:NewButton("Freeze", "Congela o jogador", function()
-    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
-        target.Character.HumanoidRootPart.Anchored = true
-    end
-end)
-
-CommandSection:NewButton("Unfreeze", "Descongela o jogador", function()
-    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
-        target.Character.HumanoidRootPart.Anchored = false
-    end
-end)
-
-CommandSection:NewButton("Jail", "Prende o jogador", function()
+createBasic("Jail", function()
     if safeTarget() then
         local jail = Instance.new("Part", workspace)
         jail.Size = Vector3.new(10,10,10)
@@ -101,32 +83,71 @@ CommandSection:NewButton("Jail", "Prende o jogador", function()
     end
 end)
 
-CommandSection:NewButton("Unjail", "Libera o jogador", function()
+createBasic("Unjail", function()
     if workspace:FindFirstChild("JailCell") then
         workspace.JailCell:Destroy()
     end
 end)
 
-CommandSection:NewButton("TP", "Teleporta o jogador até você", function()
-    if safeTarget() then
-        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position)
+createBasic("Freeze", function()
+    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
+        target.Character.HumanoidRootPart.Anchored = true
     end
 end)
 
-CommandSection:NewButton("View", "Ver jogador", function()
-    if safeTarget() and target.Character:FindFirstChild("Humanoid") then
-        workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
+createBasic("Unfreeze", function()
+    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
+        target.Character.HumanoidRootPart.Anchored = false
     end
 end)
 
-CommandSection:NewButton("LoopKill", "Mata repetidamente", function()
-    while safeTarget() and target.Character:FindFirstChild("Humanoid") do
-        target.Character.Humanoid.Health = 0
-        wait(1)
+createBasic("Float", function()
+    if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
+        local bv = Instance.new("BodyPosition", target.Character.HumanoidRootPart)
+        bv.Position = target.Character.HumanoidRootPart.Position + Vector3.new(0,10,0)
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        wait(2)
+        bv:Destroy()
     end
 end)
 
-CommandSection:NewButton("Crash", "Tenta travar o jogador", function()
+-- Administração
+local AdminTab = Window:NewTab("Administração")
+local AdminSection = AdminTab:NewSection("Comandos Admin")
+
+AdminSection:NewButton("Adm", "", function()
+    print("Comando adm executado")
+end)
+
+AdminSection:NewButton("UnAdm", "", function()
+    print("Comando unadm executado")
+end)
+
+AdminSection:NewButton("Check", "", function()
+    print("Comando check executado")
+end)
+
+AdminSection:NewButton("Tag", "", function()
+    print("Comando tag executado")
+end)
+
+AdminSection:NewButton("UnTag", "", function()
+    print("Comando untag executado")
+end)
+
+AdminSection:NewButton("Tag All", "", function()
+    print("Comando tag all executado")
+end)
+
+AdminSection:NewButton("UnTag All", "", function()
+    print("Comando untag all executado")
+end)
+
+-- Especiais
+local SpecialTab = Window:NewTab("Especiais")
+local SpecialSection = SpecialTab:NewSection("Funções Especiais")
+
+SpecialSection:NewButton("Crash", "", function()
     if safeTarget() and target.Character:FindFirstChild("HumanoidRootPart") then
         for i = 1, 100 do
             local v = Instance.new("BodyVelocity")
@@ -139,35 +160,52 @@ CommandSection:NewButton("Crash", "Tenta travar o jogador", function()
     end
 end)
 
-CommandSection:NewButton("Godmode", "Invencibilidade", function()
-    lp.Character.Humanoid.Name = "God"
+SpecialSection:NewButton("Token", "", function()
+    print("Comando token executado")
 end)
 
-CommandSection:NewButton("Bring", "Puxa o jogador até você", function()
-    if safeTarget() then
-        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position + Vector3.new(2,0,0))
-    end
+SpecialSection:NewButton("Avatar", "", function()
+    print("Comando avatar executado")
 end)
 
-CommandSection:NewButton("Btools", "Ferramentas de construção", function()
-    local tool = Instance.new("HopperBin", lp.Backpack)
-    tool.BinType = 2
+-- Aba Terror
+local TerrorTab = Window:NewTab("Terror")
+local TerrorSection = TerrorTab:NewSection("JumpScares")
+
+TerrorSection:NewButton("Jump1", "", function()
+    print("Jump1 ativado")
 end)
 
-CommandSection:NewSlider("Speed", "Velocidade do personagem", 100, 16, function(val)
-    lp.Character.Humanoid.WalkSpeed = val
+TerrorSection:NewButton("Jumps2", "", function()
+    print("Jumps2 ativado")
 end)
 
--- Aba de Créditos
+TerrorSection:NewButton("Jumps3", "", function()
+    print("Jumps3 ativado")
+end)
+
+TerrorSection:NewButton("Jumps4", "", function()
+    print("Jumps4 ativado")
+end)
+
+-- Aba Avatar
+local AvatarTab = Window:NewTab("Avatar")
+local AvatarSection = AvatarTab:NewSection("Copiar Aparência")
+
+AvatarSection:NewButton("Copiar Avatar", "", function()
+    print("Avatar copiado")
+end)
+
+-- Créditos
 local CreditsTab = Window:NewTab("Créditos")
 local CreditsSection = CreditsTab:NewSection("Informações")
 CreditsSection:NewLabel("Script VoidReaper Hub foi feito por Reaper Xploits & NovaheX")
 
--- Aba de Controle
+-- Controle
 local ControlTab = Window:NewTab("Painel")
 local ControlSection = ControlTab:NewSection("Controles")
 
-ControlSection:NewButton("Minimizar Painel", "Esconde o painel temporariamente", function()
+ControlSection:NewButton("Minimizar Painel", "", function()
     for _, gui in pairs(game.CoreGui:GetChildren()) do
         if gui.Name == "KavoUI" then
             gui.Enabled = false
@@ -175,7 +213,7 @@ ControlSection:NewButton("Minimizar Painel", "Esconde o painel temporariamente",
     end
 end)
 
-ControlSection:NewButton("Restaurar Painel", "Mostra o painel novamente", function()
+ControlSection:NewButton("Restaurar Painel", "", function()
     for _, gui in pairs(game.CoreGui:GetChildren()) do
         if gui.Name == "KavoUI" then
             gui.Enabled = true
@@ -183,7 +221,7 @@ ControlSection:NewButton("Restaurar Painel", "Mostra o painel novamente", functi
     end
 end)
 
-ControlSection:NewButton("Fechar Painel", "Remove o painel completamente", function()
+ControlSection:NewButton("Fechar Painel", "", function()
     for _, gui in pairs(game.CoreGui:GetChildren()) do
         if gui.Name == "KavoUI" then
             gui:Destroy()
