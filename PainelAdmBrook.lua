@@ -1,137 +1,128 @@
--- Painel Admin Brookhaven - VoidReaper Style
--- Criado por Minemods e Reaper Xploits
+--[[
+    VoidReaper Hub Admin 1.0
+    Criado por Minemods e Reaper Xploits
+    Inspirado no Nytherune-Hub
+]]
 
 local Players = game:GetService("Players")
 local lp = Players.LocalPlayer
-local mouse = lp:GetMouse()
 local target = nil
 
--- Interface
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("VoidReaper Admin Panel", "DarkTheme")
-local AdminTab = Window:NewTab("Admin")
-local AdminSection = AdminTab:NewSection("Comandos")
+-- GUI principal
+local gui = Instance.new("ScreenGui", lp:WaitForChild("PlayerGui"))
+gui.Name = "VoidReaperHub"
 
--- Selecionar jogador
-AdminSection:NewButton("Selecionar Jogador", "Clique em um jogador para selecionar", function()
-    mouse.Button1Down:Connect(function()
-        local part = mouse.Target
-        if part and part.Parent and Players:GetPlayerFromCharacter(part.Parent) then
-            target = Players:GetPlayerFromCharacter(part.Parent)
-            print("Selecionado:", target.Name)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 400, 0, 300)
+frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+-- Título
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+title.Text = "VoidReaper Hub Admin 1.0 - by Reaper Xploits"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 14
+
+-- Botões minimizar e fechar
+local minimize = Instance.new("TextButton", frame)
+minimize.Size = UDim2.new(0, 30, 0, 30)
+minimize.Position = UDim2.new(1, -60, 0, 0)
+minimize.Text = "-"
+minimize.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
+minimize.Font = Enum.Font.GothamBold
+minimize.TextSize = 18
+
+local close = Instance.new("TextButton", frame)
+close.Size = UDim2.new(0, 30, 0, 30)
+close.Position = UDim2.new(1, -30, 0, 0)
+close.Text = "X"
+close.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+close.TextColor3 = Color3.fromRGB(255, 255, 255)
+close.Font = Enum.Font.GothamBold
+close.TextSize = 18
+
+-- Conteúdo
+local content = Instance.new("Frame", frame)
+content.Size = UDim2.new(1, -20, 1, -50)
+content.Position = UDim2.new(0, 10, 0, 40)
+content.BackgroundTransparency = 1
+
+-- Dropdown de jogadores
+local dropdown = Instance.new("TextButton", content)
+dropdown.Size = UDim2.new(1, 0, 0, 30)
+dropdown.Position = UDim2.new(0, 0, 0, 0)
+dropdown.Text = "Selecionar Jogador"
+dropdown.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+dropdown.TextColor3 = Color3.fromRGB(255, 255, 255)
+dropdown.Font = Enum.Font.Gotham
+dropdown.TextSize = 14
+
+local playerList = Instance.new("Frame", content)
+playerList.Size = UDim2.new(1, 0, 0, 120)
+playerList.Position = UDim2.new(0, 0, 0, 30)
+playerList.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+playerList.Visible = false
+
+dropdown.MouseButton1Click:Connect(function()
+    playerList:ClearAllChildren()
+    playerList.Visible = not playerList.Visible
+    local y = 0
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= lp then
+            local btn = Instance.new("TextButton", playerList)
+            btn.Size = UDim2.new(1, 0, 0, 20)
+            btn.Position = UDim2.new(0, 0, 0, y)
+            btn.Text = p.Name
+            btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.Font = Enum.Font.Gotham
+            btn.TextSize = 14
+            btn.MouseButton1Click:Connect(function()
+                target = p
+                dropdown.Text = "Selecionado: " .. p.Name
+                playerList.Visible = false
+            end)
+            y = y + 20
         end
-    end)
+    end
 end)
 
--- Comandos principais
-AdminSection:NewButton("Kick", "Expulsa o jogador", function()
+-- Comando: Kick
+local kickBtn = Instance.new("TextButton", content)
+kickBtn.Size = UDim2.new(1, 0, 0, 30)
+kickBtn.Position = UDim2.new(0, 0, 0, 160)
+kickBtn.Text = "Kick"
+kickBtn.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+kickBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+kickBtn.Font = Enum.Font.GothamBold
+kickBtn.TextSize = 14
+kickBtn.MouseButton1Click:Connect(function()
     if target then
         target:Kick("Você foi expulso pelo VoidReaper Hub.")
     end
 end)
 
-AdminSection:NewButton("Kill", "Mata o jogador", function()
-    if target and target.Character:FindFirstChild("Humanoid") then
-        target.Character.Humanoid.Health = 0
+-- Botões minimizar e fechar
+local minimized = false
+minimize.MouseButton1Click:Connect(function()
+    if minimized then
+        content.Visible = true
+        frame.Size = UDim2.new(0, 400, 0, 300)
+        minimized = false
+    else
+        content.Visible = false
+        frame.Size = UDim2.new(0, 400, 0, 30)
+        minimized = true
     end
 end)
 
-AdminSection:NewButton("KillPlus", "Mata com efeito", function()
-    if target and target.Character:FindFirstChild("HumanoidRootPart") then
-        local explosion = Instance.new("Explosion", workspace)
-        explosion.Position = target.Character.HumanoidRootPart.Position
-        target.Character.Humanoid.Health = 0
-    end
-end)
-
-AdminSection:NewButton("Fling", "Arremessa o jogador", function()
-    if target and target.Character:FindFirstChild("HumanoidRootPart") then
-        local v = Instance.new("BodyVelocity")
-        v.Velocity = Vector3.new(9999,9999,9999)
-        v.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-        v.Parent = target.Character.HumanoidRootPart
-        wait(0.2)
-        v:Destroy()
-    end
-end)
-
--- Comandos avançados
-AdminSection:NewButton("Freeze", "Congela o jogador", function()
-    if target and target.Character:FindFirstChild("HumanoidRootPart") then
-        target.Character.HumanoidRootPart.Anchored = true
-    end
-end)
-
-AdminSection:NewButton("Unfreeze", "Descongela o jogador", function()
-    if target and target.Character:FindFirstChild("HumanoidRootPart") then
-        target.Character.HumanoidRootPart.Anchored = false
-    end
-end)
-
-AdminSection:NewButton("Jail", "Prende o jogador", function()
-    if target and target.Character then
-        local jail = Instance.new("Part", workspace)
-        jail.Size = Vector3.new(10,10,10)
-        jail.Position = lp.Character.HumanoidRootPart.Position + Vector3.new(0,5,0)
-        jail.Anchored = true
-        jail.Name = "JailCell"
-        target.Character:MoveTo(jail.Position)
-    end
-end)
-
-AdminSection:NewButton("Unjail", "Libera o jogador", function()
-    if workspace:FindFirstChild("JailCell") then
-        workspace.JailCell:Destroy()
-    end
-end)
-
-AdminSection:NewButton("TP", "Teleporta o jogador até você", function()
-    if target and target.Character then
-        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position)
-    end
-end)
-
-AdminSection:NewButton("View", "Ver jogador", function()
-    if target and target.Character:FindFirstChild("Humanoid") then
-        workspace.CurrentCamera.CameraSubject = target.Character.Humanoid
-    end
-end)
-
-AdminSection:NewButton("LoopKill", "Mata o jogador repetidamente", function()
-    while target and target.Character and target.Character:FindFirstChild("Humanoid") do
-        target.Character.Humanoid.Health = 0
-        wait(1)
-    end
-end)
-
-AdminSection:NewButton("Crash", "Tenta travar o jogador", function()
-    if target and target.Character:FindFirstChild("HumanoidRootPart") then
-        for i = 1, 100 do
-            local v = Instance.new("BodyVelocity")
-            v.Velocity = Vector3.new(math.random(-9999,9999),9999,math.random(-9999,9999))
-            v.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            v.Parent = target.Character.HumanoidRootPart
-            wait(0.05)
-            v:Destroy()
-        end
-    end
-end)
-
-AdminSection:NewButton("Godmode", "Invencibilidade", function()
-    lp.Character.Humanoid.Name = "God"
-end)
-
-AdminSection:NewButton("Bring", "Puxa o jogador até você", function()
-    if target and target.Character then
-        target.Character:MoveTo(lp.Character.HumanoidRootPart.Position + Vector3.new(2,0,0))
-    end
-end)
-
-AdminSection:NewButton("Btools", "Ferramentas de construção", function()
-    local tool = Instance.new("HopperBin", lp.Backpack)
-    tool.BinType = 2
-end)
-
-AdminSection:NewSlider("Speed", "Velocidade do personagem", 100, 16, function(val)
-    lp.Character.Humanoid.WalkSpeed = val
+close.MouseButton1Click:Connect(function()
+    gui:Destroy()
 end)
