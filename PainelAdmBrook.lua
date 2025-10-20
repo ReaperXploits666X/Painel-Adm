@@ -1,7 +1,6 @@
 --[[
     VoidReaper Hub Admin 1.0
     Feito por Reaper Xploits & NovaheX
-    Interface inspirada no Nytherune-Hub
 ]]
 
 local Players = game:GetService("Players")
@@ -11,6 +10,8 @@ local target = nil
 -- Interface Kavo UI
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("VoidReaper Hub Admin 1.0", "DarkTheme")
+
+-- Painel principal
 local AdminTab = Window:NewTab("Admin")
 local AdminSection = AdminTab:NewSection("Selecionar Jogador")
 
@@ -24,7 +25,6 @@ end
 
 local dropdown = AdminSection:NewDropdown("Jogadores", "Escolha um jogador", playerNames, function(selected)
     target = Players:FindFirstChild(selected)
-    print("Selecionado:", target.Name)
 end)
 
 Players.PlayerAdded:Connect(function(p)
@@ -157,4 +157,3 @@ end)
 -- Créditos
 local CreditsTab = Window:NewTab("Créditos")
 local CreditsSection = CreditsTab:NewSection("Feito por Reaper Xploits & NovaheX")
-CreditsSection:NewLabel("Interface e lógica assistida por NovaheX (IA colaborativa)")
