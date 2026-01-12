@@ -1,116 +1,147 @@
 --[[
-    VOIDREAPER_HAVOC666X // V42
-    FIX: Script não aparecia no Delta.
-    NEW: Slider de Força (1 a 100) simplificado.
+    VOIDREAPER_HAVOC666X // V44 SUPREME
+    FUNÇÕES INCLUÍDAS:
+    1. GHOST MODE (Invisibilidade com correção de corpo)
+    2. VOID FORCE (Ajuste de força/hitbox 1-100)
+    3. TARGET SYSTEM (Lista de jogadores selecionável)
+    4. FREEZE TARGET (Trava o alvo selecionado)
+    5. FAKE KICK 277 (Expulsa o alvo com erro de net)
+    6. SHADOW ASSAULT (Teleporte para as costas do alvo)
 ]]
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 
--- Garante que não haja duplicatas
-if game:GetService("CoreGui"):FindFirstChild("VoidV42") then 
-    game:GetService("CoreGui").VoidV42:Destroy() 
-end
+-- --- LIMPEZA DE VERSÕES ---
+local old = game:GetService("CoreGui"):FindFirstChild("VoidProject") or LocalPlayer.PlayerGui:FindFirstChild("VoidProject")
+if old then old:Destroy() end
 
 local Config = {
     Invis = false,
+    Force = 1,
+    Target = nil,
     Shadow = false,
-    ForceValue = 1,
-    Target = nil
+    Freeze = false
 }
 
--- --- SISTEMA DE FORÇA E GHOST ---
+-- --- MOTOR DO SCRIPT (FORÇA/GHOST/SHADOW/FREEZE) ---
 RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character
     if char then
-        -- Força (Hitbox)
-        if Config.ForceValue > 1 then
-            local p = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
-            if p then
-                p.Size = Vector3.new(Config.ForceValue, Config.ForceValue, Config.ForceValue)
-                p.CanCollide = false
-            end
-        end
-        -- Ghost
+        -- Invisibilidade & Anti-Bloco
         for _, v in pairs(char:GetDescendants()) do
             if v:IsA("BasePart") or v:IsA("Decal") then
                 if Config.Invis then v.Transparency = 1 
                 elseif v.Transparency == 1 then v.Transparency = 0 end
             end
         end
+        -- Força (Hitbox)
+        if Config.Force > 1 then
+            local hand = char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm")
+            if hand then hand.Size = Vector3.new(Config.Force, Config.Force, Config.Force) hand.CanCollide = false end
+        end
+    end
+
+    -- Lógica de Alvo
+    if Config.Target and Config.Target.Character then
+        local tRoot = Config.Target.Character:FindFirstChild("HumanoidRootPart")
+        if tRoot then
+            -- Freeze Alvo
+            tRoot.Anchored = Config.Freeze
+            -- Shadow Assault (Backstab)
+            if Config.Shadow then
+                local myRoot = char:FindFirstChild("HumanoidRootPart")
+                if myRoot and (myRoot.Position - tRoot.Position).Magnitude < 15 then
+                    myRoot.CFrame = tRoot.CFrame * CFrame.new(0, 0, 3)
+                end
+            end
+        end
     end
 end)
 
--- --- INTERFACE ESTILIZADA ---
-local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
-Screen.Name = "VoidV42"
+-- --- INTERFACE ---
+local Screen = Instance.new("ScreenGui", game:GetService("CoreGui") or LocalPlayer.PlayerGui)
+Screen.Name = "VoidProject"
+Screen.ResetOnSpawn = false
 
 local Main = Instance.new("Frame", Screen)
-Main.Size = UDim2.new(0, 250, 0, 300)
-Main.Position = UDim2.new(0.5, -125, 0.5, -150) -- Centro da tela
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Main.BorderSizePixel = 2
+Main.Size = UDim2.new(0, 350, 0, 320)
+Main.Position = UDim2.new(0.5, -175, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(15, 0, 0)
+Main.Draggable = true
 Main.Active = true
-Main.Draggable = true -- Pode arrastar
 
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "VOID OVERLORD V42"
-Title.TextColor3 = Color3.new(1, 0, 0)
-Title.BackgroundColor3 = Color3.new(0,0,0)
+-- LISTA DE JOGADORES (LADO ESQUERDO)
+local List = Instance.new("ScrollingFrame", Main)
+List.Size = UDim2.new(0, 140, 1, -40)
+List.Position = UDim2.new(0, 10, 0, 30)
+List.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+Instance.new("UIListLayout", List)
 
--- Botão Ghost
-local b1 = Instance.new("TextButton", Main)
-b1.Size = UDim2.new(0, 230, 0, 40)
-b1.Position = UDim2.new(0, 10, 0, 40)
-b1.Text = "GHOST MODE: OFF"
-b1.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-b1.TextColor3 = Color3.new(1, 1, 1)
-b1.MouseButton1Click:Connect(function()
-    Config.Invis = not Config.Invis
-    b1.Text = "GHOST MODE: " .. (Config.Invis and "ON" or "OFF")
+local tLabel = Instance.new("TextLabel", Main)
+tLabel.Size = UDim2.new(1, 0, 0, 25)
+tLabel.Text = "ALVO: NENHUM"
+tLabel.TextColor3 = Color3.new(1, 1, 0)
+tLabel.BackgroundTransparency = 1
+
+local function Refresh()
+    for _, v in pairs(List:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            local b = Instance.new("TextButton", List)
+            b.Size = UDim2.new(1, 0, 0, 30)
+            b.Text = p.DisplayName
+            b.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+            b.TextColor3 = Color3.new(1, 1, 1)
+            b.MouseButton1Click:Connect(function() 
+                Config.Target = p 
+                tLabel.Text = "ALVO: " .. p.Name:upper()
+            end)
+        end
+    end
+end
+Refresh()
+Players.PlayerAdded:Connect(Refresh)
+
+-- BOTÕES DE FUNÇÃO (LADO DIREITO)
+local function AddBtn(name, y, func)
+    local b = Instance.new("TextButton", Main)
+    b.Size = UDim2.new(0, 180, 0, 35)
+    b.Position = UDim2.new(0, 160, 0, y)
+    b.Text = name
+    b.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.MouseButton1Click:Connect(func)
+    return b
+end
+
+local bInvis = AddBtn("GHOST MODE: OFF", 30, function() 
+    Config.Invis = not Config.Invis 
+    Screen.Main.TextButton.Text = "GHOST MODE: " .. (Config.Invis and "ON" or "OFF")
 end)
 
--- Label de Força
-local flabel = Instance.new("TextLabel", Main)
-flabel.Size = UDim2.new(0, 230, 0, 30)
-flabel.Position = UDim2.new(0, 10, 0, 90)
-flabel.Text = "FORÇA (HITBOX): 1"
-flabel.TextColor3 = Color3.new(1, 1, 0)
-flabel.BackgroundTransparency = 1
+AddBtn("SHADOW ASSAULT: OFF", 70, function() Config.Shadow = not Config.Shadow end)
+AddBtn("FREEZE ALVO: OFF", 110, function() Config.Freeze = not Config.Freeze end)
+AddBtn("KICK ERROR 277", 150, function() if Config.Target then Config.Target:Kick("\n\n(Error Code: 277)\nCheck Connection.") end end)
 
--- Slider Simples (Botões de + e - para evitar bugs de arrastar no Delta)
-local bPlus = Instance.new("TextButton", Main)
-bPlus.Size = UDim2.new(0, 110, 0, 40)
-bPlus.Position = UDim2.new(0, 130, 0, 120)
-bPlus.Text = "FORÇA +"
-bPlus.BackgroundColor3 = Color3.fromRGB(0, 60, 0)
-bPlus.TextColor3 = Color3.new(1,1,1)
-bPlus.MouseButton1Click:Connect(function()
-    Config.ForceValue = math.min(Config.ForceValue + 5, 100)
-    flabel.Text = "FORÇA (HITBOX): " .. Config.ForceValue
-end)
+-- CONTROLE DE FORÇA
+local fLabel = Instance.new("TextLabel", Main)
+fLabel.Size = UDim2.new(0, 180, 0, 20)
+fLabel.Position = UDim2.new(0, 160, 0, 195)
+fLabel.Text = "FORÇA: 1"
+fLabel.TextColor3 = Color3.new(1,1,1)
+fLabel.BackgroundTransparency = 1
 
-local bMinus = Instance.new("TextButton", Main)
-bMinus.Size = UDim2.new(0, 110, 0, 40)
-bMinus.Position = UDim2.new(0, 10, 0, 120)
-bMinus.Text = "FORÇA -"
-bMinus.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
-bMinus.TextColor3 = Color3.new(1,1,1)
-bMinus.MouseButton1Click:Connect(function()
-    Config.ForceValue = math.max(Config.ForceValue - 5, 1)
-    flabel.Text = "FORÇA (HITBOX): " .. Config.ForceValue
-end)
+AddBtn("FORÇA +10", 220, function() Config.Force = math.min(Config.Force + 10, 100) fLabel.Text = "FORÇA: "..Config.Force end)
+AddBtn("FORÇA -10", 260, function() Config.Force = math.max(Config.Force - 10, 1) fLabel.Text = "FORÇA: "..Config.Force end)
 
--- Botão de Minimizar (Canto da tela)
-local MinBtn = Instance.new("TextButton", Screen)
-MinBtn.Size = UDim2.new(0, 50, 0, 50)
-MinBtn.Position = UDim2.new(0, 10, 0, 10)
-MinBtn.Text = "VOID"
-MinBtn.BackgroundColor3 = Color3.new(0,0,0)
-MinBtn.TextColor3 = Color3.new(1,0,0)
-MinBtn.MouseButton1Click:Connect(function()
-    Main.Visible = not Main.Visible
-end)
-Tog.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+-- BOTÃO VOID (ABRIR/FECHAR)
+local Open = Instance.new("TextButton", Screen)
+Open.Size = UDim2.new(0, 50, 0, 50)
+Open.Position = UDim2.new(0, 5, 0.5, -25)
+Open.Text = "VOID"
+Open.BackgroundColor3 = Color3.new(0,0,0)
+Open.TextColor3 = Color3.new(1,0,0)
+Instance.new("UICorner", Open).CornerRadius = UDim.new(1, 0)
+Open.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
