@@ -1,47 +1,125 @@
 --[[
-    PROJECT ZERO: GOD MODE EDITION
-    FUNÇÕES: Invisibilidade, Freeze Aura, Fake Kick, Aimbot & ESP.
-    ALVO: DELTA EXECUTOR (MOBILE)
+    VOIDREAPER_HAVOC666X // V35 FINAL
+    FIXED: Movimentação, Invisibilidade Constante, Fake Kick Select.
 ]]
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
 local Config = {
     Invis = false,
     FreezeAura = false,
-    Aimbot = false,
-    ESP = true,
-    FOV = 250
+    Visible = true
 }
 
--- --- 1. INVISIBILIDADE (DESYNC) ---
--- Remove o teu corpo para o servidor, mas tu continuas a mover-te.
-local function ToggleInvis()
-    local char = LocalPlayer.Character
-    if char then
-        for _, v in pairs(char:GetDescendants()) do
-            if v:IsA("BasePart") or v:IsA("Decal") then
-                v.Transparency = Config.Invis and 1 or 0
+-- --- 1. INVISIBILIDADE PERMANENTE (CORRIGIDO) ---
+RunService.RenderStepped:Connect(function()
+    if Config.Invis then
+        local char = LocalPlayer.Character
+        if char then
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") or v:IsA("Decal") then
+                    v.Transparency = 1
+                end
             end
         end
     end
+end)
+
+-- --- 2. INTERFACE ARRÁSTAVEL E MINIMIZÁVEL ---
+if CoreGui:FindFirstChild("OverlordV35") then CoreGui.OverlordV35:Destroy() end
+
+local Screen = Instance.new("ScreenGui", CoreGui)
+Screen.Name = "OverlordV35"
+
+local Main = Instance.new("Frame", Screen)
+Main.Size = UDim2.new(0, 220, 0, 320)
+Main.Position = UDim2.new(0.5, -110, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Main.Active = true
+Main.Draggable = true -- Agora você pode mover!
+Instance.new("UIStroke", Main).Color = Color3.new(1, 0, 0)
+Instance.new("UICorner", Main)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.Text = "SUPREME OVERLORD"
+Title.TextColor3 = Color3.new(1, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.Code
+
+-- --- BOTÕES ---
+local function AddToggle(name, setting, y)
+    local b = Instance.new("TextButton", Main)
+    b.Size = UDim2.new(1, -20, 0, 35)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.Text = name .. ": OFF"
+    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    b.TextColor3 = Color3.new(1, 1, 1)
+    b.Font = Enum.Font.Code
+    
+    b.MouseButton1Click:Connect(function()
+        Config[setting] = not Config[setting]
+        b.Text = name .. ": " .. (Config[setting] and "ON" or "OFF")
+        b.TextColor3 = Config[setting] and Color3.new(1, 0, 0) or Color3.new(1, 1, 1)
+    end)
 end
 
--- --- 2. FREEZE AURA (TRAVAR BOTÕES DOS OUTROS) ---
--- Tenta disparar eventos de 'Stun' ou 'Anchor' nos jogadores próximos.
+AddToggle("GHOST MODE", "Invis", 40)
+AddToggle("FREEZE AURA", "FreezeAura", 85)
+
+-- --- SELEÇÃO DE KICK (ERRO 277) ---
+local Box = Instance.new("TextBox", Main)
+Box.Size = UDim2.new(1, -20, 0, 35)
+Box.Position = UDim2.new(0, 10, 0, 135)
+Box.PlaceholderText = "NOME DO JOGADOR..."
+Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Box.TextColor3 = Color3.new(1, 1, 1)
+
+local KickBtn = Instance.new("TextButton", Main)
+KickBtn.Size = UDim2.new(1, -20, 0, 40)
+KickBtn.Position = UDim2.new(0, 10, 0, 180)
+KickBtn.Text = "SEND: FAKE ERROR 277"
+KickBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+KickBtn.TextColor3 = Color3.new(1, 1, 1)
+
+KickBtn.MouseButton1Click:Connect(function()
+    local targetName = Box.Text:lower()
+    for _, p in pairs(Players:GetPlayers()) do
+        if p.Name:lower():sub(1, #targetName) == targetName then
+            -- MENSAGEM QUE FINGE QUEDA DE INTERNET
+            p:Kick("\n\nPlease check your internet connection and try again.\n(Error Code: 277)")
+        end
+    end
+end)
+
+-- --- BOTÃO DE ABRIR/FECHAR ---
+local ToggleBtn = Instance.new("TextButton", Screen)
+ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+ToggleBtn.Position = UDim2.new(0.02, 0, 0.4, 0)
+ToggleBtn.Text = "H"
+ToggleBtn.BackgroundColor3 = Color3.new(0, 0, 0)
+ToggleBtn.TextColor3 = Color3.new(1, 0, 0)
+Instance.new("UIStroke", ToggleBtn).Color = Color3.new(1, 0, 0)
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    Config.Visible = not Config.Visible
+    Main.Visible = Config.Visible
+end)
+
+-- --- LÓGICA FREEZE ---
 task.spawn(function()
     while task.wait(0.5) do
         if Config.FreezeAura then
             for _, p in pairs(Players:GetPlayers()) do
                 if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local dist = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    if dist < 20 then
-                        -- Tenta travar a física do alvo (funciona em jogos com falhas de FE)
+                    local d = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if d < 15 then
                         p.Character.HumanoidRootPart.Anchored = true
-                        task.wait(2)
+                        task.wait(1)
                         p.Character.HumanoidRootPart.Anchored = false
                     end
                 end
@@ -50,64 +128,4 @@ task.spawn(function()
     end
 end)
 
--- --- 3. FAKE KICK (MENSAGEM DE ERRO) ---
--- Comando para expulsar o teu alvo com a mensagem de erro de internet.
-local function FakeKick(target)
-    if target then
-        -- No teu ecrã aparecerá como se tivesses expulsado, 
-        -- se o Delta tiver permissão de Server-Side, ele cai de verdade.
-        target:Kick("Please check your internet connection and try again. (Error Code: 277)")
-    end
-end
-
--- --- INTERFACE DE COMANDO ---
-local Screen = Instance.new("ScreenGui", game:GetService("CoreGui"))
-local Panel = Instance.new("Frame", Screen)
-Panel.Size = UDim2.new(0, 220, 0, 280)
-Panel.Position = UDim2.new(0.02, 0, 0.4, 0)
-Panel.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-Instance.new("UIStroke", Panel).Color = Color3.fromRGB(255, 255, 0) -- Amarelo/Dourado
-
-local function AddButton(name, setting, y, func)
-    local b = Instance.new("TextButton", Panel)
-    b.Size = UDim2.new(1, -20, 0, 35)
-    b.Position = UDim2.new(0, 10, 0, y)
-    b.Text = name .. ": OFF"
-    b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    b.TextColor3 = Color3.new(1, 1, 1)
-    b.Font = Enum.Font.Code
-    
-    b.MouseButton1Click:Connect(function()
-        Config[setting] = not Config[setting]
-        b.Text = name .. ": " .. (Config[setting] and "ON" or "OFF")
-        b.TextColor3 = Config[setting] and Color3.new(1, 1, 0) or Color3.new(1, 1, 1)
-        if func then func() end
-    end)
-end
-
-AddButton("GHOST MODE", "Invis", 20, ToggleInvis)
-AddButton("FREEZE AURA", "FreezeAura", 65)
-AddButton("ESP (VER INVIS)", "ESP", 110)
-AddButton("AIMBOT", "Aimbot", 155)
-
--- Campo para o Fake Kick
-local TargetName = Instance.new("TextBox", Panel)
-TargetName.Size = UDim2.new(1, -20, 0, 30)
-TargetName.Position = UDim2.new(0, 10, 0, 200)
-TargetName.PlaceholderText = "Nome do Alvo..."
-TargetName.Text = ""
-
-local KickBtn = Instance.new("TextButton", Panel)
-KickBtn.Size = UDim2.new(1, -20, 0, 30)
-KickBtn.Position = UDim2.new(0, 10, 0, 235)
-KickBtn.Text = "FORCE KICK (ERROR 277)"
-KickBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-KickBtn.MouseButton1Click:Connect(function()
-    for _, p in pairs(Players:GetPlayers()) do
-        if p.Name:lower():sub(1, #TargetName.Text) == TargetName.Text:lower() then
-            FakeKick(p)
-        end
-    end
-end)
-
-print("GOD MODE LOADED. TU ÉS O HACKER AGORA.")
+print("SUPREME OVERLORD V35 CARREGADO. USE O 'H' PARA ABRIR/FECHAR.")
