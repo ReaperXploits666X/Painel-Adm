@@ -1,6 +1,7 @@
 --[[
-    VOIDREAPER_HAVOC666X // V35 FINAL
-    FIXED: Movimentação, Invisibilidade Constante, Fake Kick Select.
+    VOIDREAPER_HAVOC666X // V37
+    MOD: Freeze Aura focado apenas no alvo selecionado.
+    FIX: Invisibilidade e Interface Mobile.
 ]]
 
 local Players = game:GetService("Players")
@@ -10,55 +11,49 @@ local CoreGui = game:GetService("CoreGui")
 
 local Config = {
     Invis = false,
-    FreezeAura = false,
+    FreezeTarget = false, -- Agora foca no alvo
     Visible = true
 }
 
--- --- 1. INVISIBILIDADE PERMANENTE (CORRIGIDO) ---
+-- --- 1. SISTEMA DE INVISIBILIDADE ---
 RunService.RenderStepped:Connect(function()
-    if Config.Invis then
-        local char = LocalPlayer.Character
-        if char then
-            for _, v in pairs(char:GetDescendants()) do
-                if v:IsA("BasePart") or v:IsA("Decal") then
+    local char = LocalPlayer.Character
+    if char then
+        for _, v in pairs(char:GetDescendants()) do
+            if v:IsA("BasePart") or v:IsA("Decal") then
+                if Config.Invis then
                     v.Transparency = 1
+                elseif v.Transparency == 1 then
+                    v.Transparency = 0
                 end
             end
         end
     end
 end)
 
--- --- 2. INTERFACE ARRÁSTAVEL E MINIMIZÁVEL ---
-if CoreGui:FindFirstChild("OverlordV35") then CoreGui.OverlordV35:Destroy() end
-
+-- --- 2. INTERFACE ---
+if CoreGui:FindFirstChild("OverlordV37") then CoreGui.OverlordV37:Destroy() end
 local Screen = Instance.new("ScreenGui", CoreGui)
-Screen.Name = "OverlordV35"
+Screen.Name = "OverlordV37"
 
 local Main = Instance.new("Frame", Screen)
 Main.Size = UDim2.new(0, 220, 0, 320)
 Main.Position = UDim2.new(0.5, -110, 0.5, -160)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Main.Active = true
-Main.Draggable = true -- Agora você pode mover!
+Main.Draggable = true 
 Instance.new("UIStroke", Main).Color = Color3.new(1, 0, 0)
 Instance.new("UICorner", Main)
 
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.Text = "SUPREME OVERLORD"
-Title.TextColor3 = Color3.new(1, 0, 0)
-Title.BackgroundTransparency = 1
-Title.Font = Enum.Font.Code
-
--- --- BOTÕES ---
 local function AddToggle(name, setting, y)
     local b = Instance.new("TextButton", Main)
     b.Size = UDim2.new(1, -20, 0, 35)
     b.Position = UDim2.new(0, 10, 0, y)
     b.Text = name .. ": OFF"
-    b.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    b.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     b.TextColor3 = Color3.new(1, 1, 1)
     b.Font = Enum.Font.Code
+    Instance.new("UICorner", b)
     
     b.MouseButton1Click:Connect(function()
         Config[setting] = not Config[setting]
@@ -68,64 +63,71 @@ local function AddToggle(name, setting, y)
 end
 
 AddToggle("GHOST MODE", "Invis", 40)
-AddToggle("FREEZE AURA", "FreezeAura", 85)
+AddToggle("FREEZE TARGET", "FreezeTarget", 85) -- Botão focado no alvo
 
--- --- SELEÇÃO DE KICK (ERRO 277) ---
+-- --- SELEÇÃO DE ALVO ---
 local Box = Instance.new("TextBox", Main)
 Box.Size = UDim2.new(1, -20, 0, 35)
 Box.Position = UDim2.new(0, 10, 0, 135)
-Box.PlaceholderText = "NOME DO JOGADOR..."
-Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Box.PlaceholderText = "NOME DO ALVO..."
+Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Box.TextColor3 = Color3.new(1, 1, 1)
 
 local KickBtn = Instance.new("TextButton", Main)
 KickBtn.Size = UDim2.new(1, -20, 0, 40)
 KickBtn.Position = UDim2.new(0, 10, 0, 180)
-KickBtn.Text = "SEND: FAKE ERROR 277"
-KickBtn.BackgroundColor3 = Color3.fromRGB(80, 0, 0)
+KickBtn.Text = "KICK: FAKE ERROR 277"
+KickBtn.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
 KickBtn.TextColor3 = Color3.new(1, 1, 1)
 
 KickBtn.MouseButton1Click:Connect(function()
     local targetName = Box.Text:lower()
     for _, p in pairs(Players:GetPlayers()) do
-        if p.Name:lower():sub(1, #targetName) == targetName then
-            -- MENSAGEM QUE FINGE QUEDA DE INTERNET
-            p:Kick("\n\nPlease check your internet connection and try again.\n(Error Code: 277)")
+        if p ~= LocalPlayer and p.Name:lower():sub(1, #targetName) == targetName then
+            p:Kick("\n\n(Error Code: 277)\nPlease check your internet connection and try again.")
         end
     end
 end)
 
--- --- BOTÃO DE ABRIR/FECHAR ---
-local ToggleBtn = Instance.new("TextButton", Screen)
-ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-ToggleBtn.Position = UDim2.new(0.02, 0, 0.4, 0)
-ToggleBtn.Text = "H"
-ToggleBtn.BackgroundColor3 = Color3.new(0, 0, 0)
-ToggleBtn.TextColor3 = Color3.new(1, 0, 0)
-Instance.new("UIStroke", ToggleBtn).Color = Color3.new(1, 0, 0)
-Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+-- Botão Minimizar (H)
+local Tog = Instance.new("TextButton", Screen)
+Tog.Size = UDim2.new(0, 45, 0, 45)
+Tog.Position = UDim2.new(0.02, 0, 0.4, 0)
+Tog.Text = "H"
+Tog.BackgroundColor3 = Color3.new(0, 0, 0)
+Tog.TextColor3 = Color3.new(1, 0, 0)
+Instance.new("UIStroke", Tog).Color = Color3.new(1, 0, 0)
+Instance.new("UICorner", Tog).CornerRadius = UDim.new(1, 0)
+Tog.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
-ToggleBtn.MouseButton1Click:Connect(function()
-    Config.Visible = not Config.Visible
-    Main.Visible = Config.Visible
-end)
-
--- --- LÓGICA FREEZE ---
+-- --- LÓGICA FREEZE FOCADA NO ALVO ---
 task.spawn(function()
-    while task.wait(0.5) do
-        if Config.FreezeAura then
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                    local d = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-                    if d < 15 then
-                        p.Character.HumanoidRootPart.Anchored = true
-                        task.wait(1)
-                        p.Character.HumanoidRootPart.Anchored = false
+    while task.wait(0.3) do
+        if Config.FreezeTarget then
+            local targetName = Box.Text:lower()
+            if targetName ~= "" then
+                for _, p in pairs(Players:GetPlayers()) do
+                    -- Verifica se o nome do jogador começa com o que você digitou
+                    if p ~= LocalPlayer and p.Name:lower():sub(1, #targetName) == targetName then
+                        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                            local d = (p.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                            -- Se o alvo estiver a menos de 20 studs, ele congela
+                            if d < 20 then
+                                p.Character.HumanoidRootPart.Anchored = true
+                            else
+                                p.Character.HumanoidRootPart.Anchored = false
+                            end
+                        end
                     end
+                end
+            end
+        else
+            -- Se desligar o botão, garante que ninguém fique travado
+            for _, p in pairs(Players:GetPlayers()) do
+                if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    p.Character.HumanoidRootPart.Anchored = false
                 end
             end
         end
     end
 end)
-
-print("SUPREME OVERLORD V35 CARREGADO. USE O 'H' PARA ABRIR/FECHAR.")
