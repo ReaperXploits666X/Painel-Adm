@@ -1,4 +1,4 @@
---[[
+
     VOIDREAPER_HAVOC666X // V41 POWER CONTROL
     NEW: Slider de Força (1 a 100).
     NEW: Hitbox Expander dinâmico.
